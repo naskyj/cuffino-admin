@@ -150,7 +150,7 @@ const UsersPage = () => {
     {
       key: "actions",
       header: "Actions",
-      render: (_, row: User) => (
+      render: (_value: any, row: User) => (
         <div className="flex gap-2">
           <button className="text-primary hover:text-primary-dark text-sm">
             Edit

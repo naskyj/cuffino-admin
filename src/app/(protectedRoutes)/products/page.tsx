@@ -134,7 +134,7 @@ const ProductsPage = () => {
     {
       key: "actions",
       header: "Actions",
-      render: (_, row: Product) => (
+      render: (_value: any, row: Product) => (
         <div className="flex gap-2">
           <button className="text-primary hover:text-primary-dark text-sm">
             Edit
