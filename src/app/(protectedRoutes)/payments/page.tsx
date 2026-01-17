@@ -152,7 +152,7 @@ const PaymentsPage = () => {
     {
       key: "actions",
       header: "Actions",
-      render: (_, row: Payment) => (
+      render: (_value: any, row: Payment) => (
         <div className="flex gap-2">
           <button className="text-primary hover:text-primary-dark text-sm">
             View
@@ -257,3 +257,4 @@ const PaymentsPage = () => {
 };
 
 export default PaymentsPage;
+
