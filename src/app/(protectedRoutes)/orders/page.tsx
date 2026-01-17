@@ -123,7 +123,7 @@ const OrdersPage = () => {
     {
       key: "actions",
       header: "Actions",
-      render: (_: never, row: Order) => (
+      render: (_: any, row: Order) => (
         <div className="flex gap-2">
           <button className="text-primary hover:text-primary-dark text-sm">
             View
@@ -221,4 +221,5 @@ const OrdersPage = () => {
 };
 
 export default OrdersPage;
+
 
