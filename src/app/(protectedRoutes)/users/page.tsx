@@ -1,14 +1,16 @@
 "use client";
 
 import React, { useState } from "react";
-import { Button } from "@/components/ui";
+
 import ConfirmDialog from "@/components/ConfirmDialog";
-import { showToast } from "@/utilities/toast";
+import { Button } from "@/components/ui";
 import {
-  useGetAllUsersQuery,
   useDeleteUserMutation,
+  useGetAllUsersQuery,
   useUpdateUserMutation,
 } from "@/store/api";
+import { showToast } from "@/utilities/toast";
+
 import DataTable from "../_components/DataTable";
 import PageHeader from "../_components/PageHeader";
 import UserDetailModal from "./_components/UserDetailModal";
@@ -26,11 +28,8 @@ const UsersPage = () => {
   const [deleteUser] = useDeleteUserMutation();
   const [updateUser] = useUpdateUserMutation();
 
-  const getStatusColor = (isActive: boolean | undefined) => {
-    return isActive
-      ? "bg-green-100 text-green-800"
-      : "bg-gray-100 text-gray-800";
-  };
+  const getStatusColor = (isActive: boolean | undefined) =>
+    isActive ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800";
 
   const getRoleColor = (role: any) => {
     const roleName = typeof role === "string" ? role : role?.roleName || "";
@@ -94,7 +93,8 @@ const UsersPage = () => {
       key: "role",
       header: "Role",
       render: (value: any) => {
-        const roleName = typeof value === "string" ? value : value?.roleName || "N/A";
+        const roleName =
+          typeof value === "string" ? value : value?.roleName || "N/A";
         return (
           <span
             className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getRoleColor(
@@ -153,9 +153,13 @@ const UsersPage = () => {
       user.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.email?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus =
-      !statusFilter || (statusFilter === "active" && user.active) || (statusFilter === "inactive" && !user.active);
-    const userRoleName = typeof user.role === "string" ? user.role : user.role?.roleName || "";
-    const matchesRole = !roleFilter || userRoleName.toUpperCase() === roleFilter.toUpperCase();
+      !statusFilter ||
+      (statusFilter === "active" && user.active) ||
+      (statusFilter === "inactive" && !user.active);
+    const userRoleName =
+      typeof user.role === "string" ? user.role : user.role?.roleName || "";
+    const matchesRole =
+      !roleFilter || userRoleName.toUpperCase() === roleFilter.toUpperCase();
     return matchesSearch && matchesStatus && matchesRole;
   });
 
@@ -170,17 +174,23 @@ const UsersPage = () => {
     },
     {
       label: "Admins",
-      value: users.filter((u: any) => {
-        const roleName = typeof u.role === "string" ? u.role : u.role?.roleName || "";
-        return roleName.toUpperCase() === "ADMIN";
-      }).length.toString(),
+      value: users
+        .filter((u: any) => {
+          const roleName =
+            typeof u.role === "string" ? u.role : u.role?.roleName || "";
+          return roleName.toUpperCase() === "ADMIN";
+        })
+        .length.toString(),
     },
     {
       label: "Customers",
-      value: users.filter((u: any) => {
-        const roleName = typeof u.role === "string" ? u.role : u.role?.roleName || "";
-        return roleName.toUpperCase() === "CUSTOMER";
-      }).length.toString(),
+      value: users
+        .filter((u: any) => {
+          const roleName =
+            typeof u.role === "string" ? u.role : u.role?.roleName || "";
+          return roleName.toUpperCase() === "CUSTOMER";
+        })
+        .length.toString(),
     },
   ];
 
@@ -205,7 +215,10 @@ const UsersPage = () => {
                     "Created At",
                   ].join(","),
                   ...users.map((u: any) => {
-                    const roleName = typeof u.role === "string" ? u.role : u.role?.roleName || "";
+                    const roleName =
+                      typeof u.role === "string"
+                        ? u.role
+                        : u.role?.roleName || "";
                     return [
                       u.userId,
                       u.username,

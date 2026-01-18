@@ -2,13 +2,14 @@
 
 import React from "react";
 
-import PageHeader from "../_components/PageHeader";
-import { StatCard } from "../_components";
 import {
   useGetAllOrdersQuery,
   useGetAllProductsQuery,
   useGetAllUsersQuery,
 } from "@/store/api";
+
+import { StatCard } from "../_components";
+import PageHeader from "../_components/PageHeader";
 
 const DashboardPage = () => {
   const { data: users, isLoading: usersLoading } = useGetAllUsersQuery();
@@ -51,10 +52,7 @@ const DashboardPage = () => {
     ? orders
         .slice()
         .sort(
-          (
-            a: { orderDate?: string },
-            b: { orderDate?: string }
-          ) =>
+          (a: { orderDate?: string }, b: { orderDate?: string }) =>
             new Date(b.orderDate || 0).getTime() -
             new Date(a.orderDate || 0).getTime()
         )
@@ -71,10 +69,12 @@ const DashboardPage = () => {
     const diffDays = Math.floor(diffMs / 86400000);
 
     if (diffMins < 1) return "Just now";
-    if (diffMins < 60)
+    if (diffMins < 60) {
       return `${diffMins} minute${diffMins > 1 ? "s" : ""} ago`;
-    if (diffHours < 24)
+    }
+    if (diffHours < 24) {
       return `${diffHours} hour${diffHours > 1 ? "s" : ""} ago`;
+    }
     return `${diffDays} day${diffDays > 1 ? "s" : ""} ago`;
   };
 

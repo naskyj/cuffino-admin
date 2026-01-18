@@ -6,8 +6,10 @@ import { cn } from "@/lib/utils";
 
 import { EyeOpen, EyesClose } from "./assets";
 
-export interface PasswordInputProps
-  extends Omit<React.ComponentProps<"input">, "type"> {
+export interface PasswordInputProps extends Omit<
+  React.ComponentProps<"input">,
+  "type"
+> {
   showPassword?: boolean;
   onTogglePassword?: () => void;
   label?: string;

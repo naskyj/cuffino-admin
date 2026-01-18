@@ -19,7 +19,7 @@ import {
 
 const baseQuery = fetchBaseQuery({
   baseUrl: ENV_VARS.API_URL,
-  prepareHeaders: async (headers, { extra, endpoint }) => {
+  prepareHeaders: async (headers, { extra: _extra, endpoint: _endpoint }) => {
     let token = getClientCookie(AUTH_COOKIE_NAMES.token);
 
     if (!token) {

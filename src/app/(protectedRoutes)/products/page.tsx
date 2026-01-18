@@ -1,22 +1,21 @@
 "use client";
 
 import React, { useState } from "react";
-import { Button, Modal } from "@/components/ui";
+
 import ConfirmDialog from "@/components/ConfirmDialog";
+import { Button, Modal } from "@/components/ui";
 import {
-  useGetAllProductsQuery,
+  ProductCustomizationDTO,
+  useCreateCategoryMutation,
+  useCreateProductMutation,
   useDeleteProductMutation,
   useGetAllCategoriesQuery,
-  useCreateProductMutation,
+  useGetAllProductsQuery,
   useUpdateProductMutation,
-  useCreateCategoryMutation,
   useUploadImageMutation,
-  useGetProductCustomizationsQuery,
-  useAddCustomizationMutation,
-  useDeleteCustomizationMutation,
-  ProductCustomizationDTO,
 } from "@/store/api";
 import { showToast } from "@/utilities/toast";
+
 import DataTable from "../_components/DataTable";
 import PageHeader from "../_components/PageHeader";
 
@@ -61,11 +60,9 @@ const ProductsPage = () => {
     description: "",
   });
 
-  const getStatusColor = (product: any) => {
+  const getStatusColor = (product: any) =>
     // You can add status logic based on your product model
-        return "bg-green-100 text-green-800";
-  };
-
+    "bg-green-100 text-green-800";
   const handleDeleteClick = (productId: number) => {
     setProductToDelete(productId);
     setShowDeleteDialog(true);
@@ -93,9 +90,14 @@ const ProductsPage = () => {
         name: formData.name,
         description: formData.description || undefined,
         price: Number(formData.price),
-        stockQuantity: formData.stockQuantity ? Number(formData.stockQuantity) : 0,
+        stockQuantity: formData.stockQuantity
+          ? Number(formData.stockQuantity)
+          : 0,
         images: uploadedImages.map((url) => ({ imageUrl: url })),
-        customizations: formData.customizations.length > 0 ? formData.customizations : undefined,
+        customizations:
+          formData.customizations.length > 0
+            ? formData.customizations
+            : undefined,
       };
 
       if (formData.categoryId) {
@@ -127,9 +129,14 @@ const ProductsPage = () => {
         name: formData.name,
         description: formData.description || undefined,
         price: Number(formData.price),
-        stockQuantity: formData.stockQuantity ? Number(formData.stockQuantity) : 0,
+        stockQuantity: formData.stockQuantity
+          ? Number(formData.stockQuantity)
+          : 0,
         images: uploadedImages.map((url) => ({ imageUrl: url })),
-        customizations: formData.customizations.length > 0 ? formData.customizations : undefined,
+        customizations:
+          formData.customizations.length > 0
+            ? formData.customizations
+            : undefined,
       };
 
       if (formData.categoryId) {
@@ -184,7 +191,11 @@ const ProductsPage = () => {
   };
 
   const handleAddCustomization = () => {
-    if (!customizationForm.name || !customizationForm.customizationType || !customizationForm.customizationValue) {
+    if (
+      !customizationForm.name ||
+      !customizationForm.customizationType ||
+      !customizationForm.customizationValue
+    ) {
       showToast.warning("Please fill in all required customization fields");
       return;
     }
@@ -245,15 +256,18 @@ const ProductsPage = () => {
       stockQuantity: product.stockQuantity?.toString() || "0",
       categoryId: product.category?.categoryId?.toString() || "",
       images: product.images?.map((img: any) => img.imageUrl || img.url) || [],
-      customizations: product.customizations?.map((cust: any) => ({
-        customizationId: cust.customizationId,
-        name: cust.name,
-        description: cust.description,
-        customizationType: cust.customizationType,
-        customizationValue: cust.customizationValue,
-      })) || [],
+      customizations:
+        product.customizations?.map((cust: any) => ({
+          customizationId: cust.customizationId,
+          name: cust.name,
+          description: cust.description,
+          customizationType: cust.customizationType,
+          customizationValue: cust.customizationValue,
+        })) || [],
     });
-    setUploadedImages(product.images?.map((img: any) => img.imageUrl || img.url) || []);
+    setUploadedImages(
+      product.images?.map((img: any) => img.imageUrl || img.url) || []
+    );
     setShowEditModal(true);
   };
 
@@ -365,8 +379,10 @@ const ProductsPage = () => {
       value:
         products.length > 0
           ? `$${(
-              products.reduce((sum: number, p: any) => sum + (p.price || 0), 0) /
-              products.length
+              products.reduce(
+                (sum: number, p: any) => sum + (p.price || 0),
+                0
+              ) / products.length
             ).toFixed(2)}`
           : "$0.00",
     },
@@ -444,16 +460,16 @@ const ProductsPage = () => {
           <div className="text-gray-500">Loading products...</div>
         </div>
       ) : (
-      <div className="bg-white rounded-lg border border-gray-200">
-        <DataTable
-          data={filteredData}
-          columns={columns}
-          emptyMessage="No products found"
-          onRowClick={(row) => {
-            console.log("Clicked product:", row);
-          }}
-        />
-      </div>
+        <div className="bg-white rounded-lg border border-gray-200">
+          <DataTable
+            data={filteredData}
+            columns={columns}
+            emptyMessage="No products found"
+            onRowClick={(row) => {
+              console.log("Clicked product:", row);
+            }}
+          />
+        </div>
       )}
 
       {/* Add Product Modal */}
@@ -463,7 +479,7 @@ const ProductsPage = () => {
           setShowAddModal(false);
           resetForm();
         }}
-        showCloseButton={true}
+        showCloseButton
         className="max-w-2xl"
       >
         <div className="p-6">
@@ -587,7 +603,10 @@ const ProductsPage = () => {
                     placeholder="Name (e.g., Color)"
                     value={customizationForm.name}
                     onChange={(e) =>
-                      setCustomizationForm({ ...customizationForm, name: e.target.value })
+                      setCustomizationForm({
+                        ...customizationForm,
+                        name: e.target.value,
+                      })
                     }
                     className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary text-sm"
                   />
@@ -596,7 +615,10 @@ const ProductsPage = () => {
                     placeholder="Type (e.g., SELECT)"
                     value={customizationForm.customizationType}
                     onChange={(e) =>
-                      setCustomizationForm({ ...customizationForm, customizationType: e.target.value })
+                      setCustomizationForm({
+                        ...customizationForm,
+                        customizationType: e.target.value,
+                      })
                     }
                     className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary text-sm"
                   />
@@ -605,7 +627,10 @@ const ProductsPage = () => {
                     placeholder="Value (e.g., Red, Blue)"
                     value={customizationForm.customizationValue}
                     onChange={(e) =>
-                      setCustomizationForm({ ...customizationForm, customizationValue: e.target.value })
+                      setCustomizationForm({
+                        ...customizationForm,
+                        customizationValue: e.target.value,
+                      })
                     }
                     className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary text-sm"
                   />
@@ -623,7 +648,10 @@ const ProductsPage = () => {
                   placeholder="Description (optional)"
                   value={customizationForm.description}
                   onChange={(e) =>
-                    setCustomizationForm({ ...customizationForm, description: e.target.value })
+                    setCustomizationForm({
+                      ...customizationForm,
+                      description: e.target.value,
+                    })
                   }
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary text-sm"
                 />
@@ -676,13 +704,11 @@ const ProductsPage = () => {
           setSelectedProduct(null);
           resetForm();
         }}
-        showCloseButton={true}
+        showCloseButton
         className="max-w-2xl"
       >
         <div className="p-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">
-            Edit Product
-          </h2>
+          <h2 className="text-xl font-bold text-gray-900 mb-4">Edit Product</h2>
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -802,7 +828,10 @@ const ProductsPage = () => {
                     placeholder="Name (e.g., Color)"
                     value={customizationForm.name}
                     onChange={(e) =>
-                      setCustomizationForm({ ...customizationForm, name: e.target.value })
+                      setCustomizationForm({
+                        ...customizationForm,
+                        name: e.target.value,
+                      })
                     }
                     className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary text-sm"
                   />
@@ -811,7 +840,10 @@ const ProductsPage = () => {
                     placeholder="Type (e.g., SELECT)"
                     value={customizationForm.customizationType}
                     onChange={(e) =>
-                      setCustomizationForm({ ...customizationForm, customizationType: e.target.value })
+                      setCustomizationForm({
+                        ...customizationForm,
+                        customizationType: e.target.value,
+                      })
                     }
                     className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary text-sm"
                   />
@@ -820,7 +852,10 @@ const ProductsPage = () => {
                     placeholder="Value (e.g., Red, Blue)"
                     value={customizationForm.customizationValue}
                     onChange={(e) =>
-                      setCustomizationForm({ ...customizationForm, customizationValue: e.target.value })
+                      setCustomizationForm({
+                        ...customizationForm,
+                        customizationValue: e.target.value,
+                      })
                     }
                     className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary text-sm"
                   />
@@ -838,7 +873,10 @@ const ProductsPage = () => {
                   placeholder="Description (optional)"
                   value={customizationForm.description}
                   onChange={(e) =>
-                    setCustomizationForm({ ...customizationForm, description: e.target.value })
+                    setCustomizationForm({
+                      ...customizationForm,
+                      description: e.target.value,
+                    })
                   }
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary text-sm"
                 />
@@ -891,13 +929,11 @@ const ProductsPage = () => {
           setShowCategoryModal(false);
           setCategoryFormData({ categoryName: "", description: "" });
         }}
-        showCloseButton={true}
+        showCloseButton
         className="max-w-md"
       >
         <div className="p-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">
-            Add Category
-          </h2>
+          <h2 className="text-xl font-bold text-gray-900 mb-4">Add Category</h2>
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">

@@ -25,8 +25,10 @@ import {
 
 import { cn } from "@/lib/utils";
 
-interface RichTextEditorProps<T extends FieldValues = FieldValues>
-  extends Omit<React.ComponentProps<"div">, "name"> {
+interface RichTextEditorProps<T extends FieldValues = FieldValues> extends Omit<
+  React.ComponentProps<"div">,
+  "name"
+> {
   name: FieldPath<T>;
   control: Control<T>;
   label?: string;

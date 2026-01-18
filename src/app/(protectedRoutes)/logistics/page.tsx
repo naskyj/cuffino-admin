@@ -1,16 +1,18 @@
 "use client";
 
 import React, { useState } from "react";
-import { Button, Modal } from "@/components/ui";
+
 import ConfirmDialog from "@/components/ConfirmDialog";
-import { showToast } from "@/utilities/toast";
+import { Button, Modal } from "@/components/ui";
 import {
-  useGetAllLogisticsQuery,
-  useDeleteLogisticsMutation,
-  useUpdateLogisticsMutation,
   useCreateLogisticsMutation,
+  useDeleteLogisticsMutation,
+  useGetAllLogisticsQuery,
   useGetAllOrdersQuery,
+  useUpdateLogisticsMutation,
 } from "@/store/api";
+import { showToast } from "@/utilities/toast";
+
 import DataTable from "../_components/DataTable";
 import PageHeader from "../_components/PageHeader";
 
@@ -23,7 +25,11 @@ const LogisticsPage = () => {
   const [itemToDelete, setItemToDelete] = useState<number | null>(null);
   const [selectedItem, setSelectedItem] = useState<any>(null);
 
-  const { data: logistics = [], isLoading, refetch } = useGetAllLogisticsQuery();
+  const {
+    data: logistics = [],
+    isLoading,
+    refetch,
+  } = useGetAllLogisticsQuery();
   const { data: orders = [] } = useGetAllOrdersQuery();
   const [deleteLogistics] = useDeleteLogisticsMutation();
   const [updateLogistics] = useUpdateLogisticsMutation();
@@ -84,7 +90,9 @@ const LogisticsPage = () => {
         orderId: Number(formData.orderId),
         carrier: formData.carrier,
         trackingNumber: formData.trackingNumber,
-        packageWeight: formData.packageWeight ? Number(formData.packageWeight) : undefined,
+        packageWeight: formData.packageWeight
+          ? Number(formData.packageWeight)
+          : undefined,
         packageDimensions: formData.packageDimensions || undefined,
         customsDocUrl: formData.customsDocUrl || undefined,
         estimatedDelivery: formData.estimatedDelivery || undefined,
@@ -108,7 +116,9 @@ const LogisticsPage = () => {
           orderId: Number(formData.orderId),
           carrier: formData.carrier,
           trackingNumber: formData.trackingNumber,
-          packageWeight: formData.packageWeight ? Number(formData.packageWeight) : undefined,
+          packageWeight: formData.packageWeight
+            ? Number(formData.packageWeight)
+            : undefined,
           packageDimensions: formData.packageDimensions || undefined,
           customsDocUrl: formData.customsDocUrl || undefined,
           estimatedDelivery: formData.estimatedDelivery || undefined,
@@ -256,7 +266,8 @@ const LogisticsPage = () => {
       item.carrier?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.orderId?.toString().includes(searchTerm);
     const matchesStatus =
-      !statusFilter || item.status?.toUpperCase() === statusFilter.toUpperCase();
+      !statusFilter ||
+      item.status?.toUpperCase() === statusFilter.toUpperCase();
     return matchesSearch && matchesStatus;
   });
 
@@ -267,17 +278,25 @@ const LogisticsPage = () => {
     },
     {
       label: "In Transit",
-      value: logistics.filter(
-        (l: any) => l.status?.toUpperCase() === "IN_TRANSIT" || l.status?.toUpperCase() === "IN-TRANSIT"
-      ).length.toString(),
+      value: logistics
+        .filter(
+          (l: any) =>
+            l.status?.toUpperCase() === "IN_TRANSIT" ||
+            l.status?.toUpperCase() === "IN-TRANSIT"
+        )
+        .length.toString(),
     },
     {
       label: "Delivered",
-      value: logistics.filter((l: any) => l.status === "DELIVERED").length.toString(),
+      value: logistics
+        .filter((l: any) => l.status === "DELIVERED")
+        .length.toString(),
     },
     {
       label: "Pending",
-      value: logistics.filter((l: any) => l.status === "PENDING").length.toString(),
+      value: logistics
+        .filter((l: any) => l.status === "PENDING")
+        .length.toString(),
     },
   ];
 
@@ -364,7 +383,7 @@ const LogisticsPage = () => {
           setShowAddModal(false);
           resetForm();
         }}
-        showCloseButton={true}
+        showCloseButton
         className="max-w-2xl"
       >
         <div className="p-6">
@@ -385,7 +404,8 @@ const LogisticsPage = () => {
                 <option value="">Select Order</option>
                 {orders.map((order: any) => (
                   <option key={order.orderId} value={order.orderId}>
-                    Order #{order.orderId} - {order.customerUsername || order.customerId}
+                    Order #{order.orderId} -{" "}
+                    {order.customerUsername || order.customerId}
                   </option>
                 ))}
               </select>
@@ -461,7 +481,10 @@ const LogisticsPage = () => {
                 type="text"
                 value={formData.packageDimensions}
                 onChange={(e) =>
-                  setFormData({ ...formData, packageDimensions: e.target.value })
+                  setFormData({
+                    ...formData,
+                    packageDimensions: e.target.value,
+                  })
                 }
                 placeholder="e.g., 10x20x30 cm"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
@@ -476,7 +499,10 @@ const LogisticsPage = () => {
                   type="date"
                   value={formData.estimatedDelivery}
                   onChange={(e) =>
-                    setFormData({ ...formData, estimatedDelivery: e.target.value })
+                    setFormData({
+                      ...formData,
+                      estimatedDelivery: e.target.value,
+                    })
                   }
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                 />
@@ -489,7 +515,10 @@ const LogisticsPage = () => {
                   type="text"
                   value={formData.currentLocation}
                   onChange={(e) =>
-                    setFormData({ ...formData, currentLocation: e.target.value })
+                    setFormData({
+                      ...formData,
+                      currentLocation: e.target.value,
+                    })
                   }
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                 />
@@ -532,11 +561,13 @@ const LogisticsPage = () => {
           setSelectedItem(null);
           resetForm();
         }}
-        showCloseButton={true}
+        showCloseButton
         className="max-w-2xl"
       >
         <div className="p-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Edit Shipment</h2>
+          <h2 className="text-xl font-bold text-gray-900 mb-4">
+            Edit Shipment
+          </h2>
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -553,7 +584,8 @@ const LogisticsPage = () => {
                 <option value="">Select Order</option>
                 {orders.map((order: any) => (
                   <option key={order.orderId} value={order.orderId}>
-                    Order #{order.orderId} - {order.customerUsername || order.customerId}
+                    Order #{order.orderId} -{" "}
+                    {order.customerUsername || order.customerId}
                   </option>
                 ))}
               </select>
@@ -629,7 +661,10 @@ const LogisticsPage = () => {
                 type="text"
                 value={formData.packageDimensions}
                 onChange={(e) =>
-                  setFormData({ ...formData, packageDimensions: e.target.value })
+                  setFormData({
+                    ...formData,
+                    packageDimensions: e.target.value,
+                  })
                 }
                 placeholder="e.g., 10x20x30 cm"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
@@ -644,7 +679,10 @@ const LogisticsPage = () => {
                   type="date"
                   value={formData.estimatedDelivery}
                   onChange={(e) =>
-                    setFormData({ ...formData, estimatedDelivery: e.target.value })
+                    setFormData({
+                      ...formData,
+                      estimatedDelivery: e.target.value,
+                    })
                   }
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                 />
@@ -657,7 +695,10 @@ const LogisticsPage = () => {
                   type="text"
                   value={formData.currentLocation}
                   onChange={(e) =>
-                    setFormData({ ...formData, currentLocation: e.target.value })
+                    setFormData({
+                      ...formData,
+                      currentLocation: e.target.value,
+                    })
                   }
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                 />

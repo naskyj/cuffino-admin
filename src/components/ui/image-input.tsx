@@ -11,8 +11,10 @@ import {
 
 import { cn } from "@/lib/utils";
 
-interface ImageInputProps<T extends FieldValues = FieldValues>
-  extends Omit<React.ComponentProps<"input">, "name" | "type"> {
+interface ImageInputProps<T extends FieldValues = FieldValues> extends Omit<
+  React.ComponentProps<"input">,
+  "name" | "type"
+> {
   name: FieldPath<T>;
   control: Control<T>;
   label?: string;

@@ -10,8 +10,10 @@ import {
 
 import { cn } from "@/lib/utils";
 
-interface TextFieldProps<T extends FieldValues = FieldValues>
-  extends Omit<React.ComponentProps<"input">, "name"> {
+interface TextFieldProps<T extends FieldValues = FieldValues> extends Omit<
+  React.ComponentProps<"input">,
+  "name"
+> {
   name: FieldPath<T>;
   control: Control<T>;
   label?: string;

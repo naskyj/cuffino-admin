@@ -1,12 +1,13 @@
 "use client";
 
 import React from "react";
+
 import { Modal } from "@/components/ui";
 import {
-  useGetUserByIdQuery,
-  useGetUserAddressesQuery,
   useGetMeasurementProfilesQuery,
   useGetOrdersByCustomerQuery,
+  useGetUserAddressesQuery,
+  useGetUserByIdQuery,
 } from "@/store/api";
 
 interface UserDetailModalProps {
@@ -20,10 +21,9 @@ export default function UserDetailModal({
   userId,
   onClose,
 }: UserDetailModalProps) {
-  const { data: user, isLoading: userLoading } = useGetUserByIdQuery(
-    userId!,
-    { skip: !userId }
-  );
+  const { data: user, isLoading: userLoading } = useGetUserByIdQuery(userId!, {
+    skip: !userId,
+  });
   const { data: addresses = [], isLoading: addressesLoading } =
     useGetUserAddressesQuery(userId!, { skip: !userId });
   const { data: measurements = [], isLoading: measurementsLoading } =
@@ -83,8 +83,10 @@ export default function UserDetailModal({
 
         {isLoading ? (
           <div className="text-center py-12">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4"></div>
-            <div className="text-gray-500 font-medium">Loading user details...</div>
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4" />
+            <div className="text-gray-500 font-medium">
+              Loading user details...
+            </div>
           </div>
         ) : (
           <div className="space-y-6">
@@ -239,10 +241,12 @@ export default function UserDetailModal({
                           <div className="space-y-1 text-sm text-gray-700">
                             <p className="font-medium">
                               {address.streetAddress}
-                              {address.addressLine2 && `, ${address.addressLine2}`}
+                              {address.addressLine2 &&
+                                `, ${address.addressLine2}`}
                             </p>
                             <p>
-                              {address.city}, {address.state} {address.postalCode}
+                              {address.city}, {address.state}{" "}
+                              {address.postalCode}
                             </p>
                             <p className="font-semibold text-gray-900">
                               {address.country}
@@ -283,7 +287,9 @@ export default function UserDetailModal({
               </div>
               {measurements.length === 0 ? (
                 <div className="bg-white rounded-lg p-6 border border-primary/20 text-center">
-                  <p className="text-sm text-gray-500">No measurement profiles found</p>
+                  <p className="text-sm text-gray-500">
+                    No measurement profiles found
+                  </p>
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -298,7 +304,9 @@ export default function UserDetailModal({
                       <div className="grid grid-cols-3 gap-3 text-sm">
                         {measurement.bust && (
                           <div className="bg-primary/5 rounded-lg p-3 border border-primary/20">
-                            <span className="text-primary font-semibold">Bust:</span>{" "}
+                            <span className="text-primary font-semibold">
+                              Bust:
+                            </span>{" "}
                             <span className="text-gray-900 font-bold">
                               {measurement.bust} cm
                             </span>
@@ -306,7 +314,9 @@ export default function UserDetailModal({
                         )}
                         {measurement.waist && (
                           <div className="bg-primary/5 rounded-lg p-3 border border-primary/20">
-                            <span className="text-primary font-semibold">Waist:</span>{" "}
+                            <span className="text-primary font-semibold">
+                              Waist:
+                            </span>{" "}
                             <span className="text-gray-900 font-bold">
                               {measurement.waist} cm
                             </span>
@@ -314,7 +324,9 @@ export default function UserDetailModal({
                         )}
                         {measurement.hips && (
                           <div className="bg-primary/5 rounded-lg p-3 border border-primary/20">
-                            <span className="text-primary font-semibold">Hips:</span>{" "}
+                            <span className="text-primary font-semibold">
+                              Hips:
+                            </span>{" "}
                             <span className="text-gray-900 font-bold">
                               {measurement.hips} cm
                             </span>
@@ -322,7 +334,9 @@ export default function UserDetailModal({
                         )}
                         {measurement.shoulderWidth && (
                           <div className="bg-primary/5 rounded-lg p-3 border border-primary/20">
-                            <span className="text-primary font-semibold">Shoulder:</span>{" "}
+                            <span className="text-primary font-semibold">
+                              Shoulder:
+                            </span>{" "}
                             <span className="text-gray-900 font-bold">
                               {measurement.shoulderWidth} cm
                             </span>
@@ -330,7 +344,9 @@ export default function UserDetailModal({
                         )}
                         {measurement.armLength && (
                           <div className="bg-primary/5 rounded-lg p-3 border border-primary/20">
-                            <span className="text-primary font-semibold">Arm Length:</span>{" "}
+                            <span className="text-primary font-semibold">
+                              Arm Length:
+                            </span>{" "}
                             <span className="text-gray-900 font-bold">
                               {measurement.armLength} cm
                             </span>
@@ -338,7 +354,9 @@ export default function UserDetailModal({
                         )}
                         {measurement.legLength && (
                           <div className="bg-primary/5 rounded-lg p-3 border border-primary/20">
-                            <span className="text-primary font-semibold">Leg Length:</span>{" "}
+                            <span className="text-primary font-semibold">
+                              Leg Length:
+                            </span>{" "}
                             <span className="text-gray-900 font-bold">
                               {measurement.legLength} cm
                             </span>
@@ -431,7 +449,12 @@ export default function UserDetailModal({
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <span className="text-sm font-bold text-gray-900">
-                              ${(order.finalizedTotal || order.totalPrice || 0).toFixed(2)}
+                              $
+                              {(
+                                order.finalizedTotal ||
+                                order.totalPrice ||
+                                0
+                              ).toFixed(2)}
                             </span>
                           </td>
                         </tr>

@@ -1,18 +1,20 @@
 "use client";
 
 import React, { useState } from "react";
-import { Button, Modal } from "@/components/ui";
+
 import ConfirmDialog from "@/components/ConfirmDialog";
-import { showToast } from "@/utilities/toast";
+import { Button, Modal } from "@/components/ui";
 import {
-  useGetAllProductionQueuesQuery,
-  useCreateProductionQueueMutation,
-  useUpdateProductionQueueMutation,
-  useDeleteProductionQueueMutation,
-  useUpdateProductionStatusMutation,
-  useAssignProductionMutation,
   ProductionStatus,
+  useAssignProductionMutation,
+  useCreateProductionQueueMutation,
+  useDeleteProductionQueueMutation,
+  useGetAllProductionQueuesQuery,
+  useUpdateProductionQueueMutation,
+  useUpdateProductionStatusMutation,
 } from "@/store/api";
+import { showToast } from "@/utilities/toast";
+
 import DataTable from "../_components/DataTable";
 import PageHeader from "../_components/PageHeader";
 
@@ -27,8 +29,12 @@ const ProductionPage = () => {
   const [itemToDelete, setItemToDelete] = useState<number | null>(null);
   const [selectedItem, setSelectedItem] = useState<any>(null);
 
-  const { data: productionQueues = [], isLoading, error, refetch } =
-    useGetAllProductionQueuesQuery();
+  const {
+    data: productionQueues = [],
+    isLoading,
+    error,
+    refetch,
+  } = useGetAllProductionQueuesQuery();
   const [createProduction] = useCreateProductionQueueMutation();
   const [updateProduction] = useUpdateProductionQueueMutation();
   const [deleteProduction] = useDeleteProductionQueueMutation();
@@ -68,7 +74,9 @@ const ProductionPage = () => {
     try {
       await createProduction({
         orderId: Number(formData.orderId),
-        orderItemId: formData.orderItemId ? Number(formData.orderItemId) : undefined,
+        orderItemId: formData.orderItemId
+          ? Number(formData.orderItemId)
+          : undefined,
         status: formData.status,
         assignedDesignerId: formData.assignedDesignerId
           ? Number(formData.assignedDesignerId)
@@ -91,7 +99,9 @@ const ProductionPage = () => {
         id: selectedItem.queueId,
         data: {
           orderId: Number(formData.orderId),
-          orderItemId: formData.orderItemId ? Number(formData.orderItemId) : undefined,
+          orderItemId: formData.orderItemId
+            ? Number(formData.orderItemId)
+            : undefined,
           status: formData.status,
           assignedDesignerId: formData.assignedDesignerId
             ? Number(formData.assignedDesignerId)
@@ -307,10 +317,10 @@ const ProductionPage = () => {
             </button>
             <button
               onClick={() => openAssignModal(row)}
-            className="text-purple-600 hover:text-purple-800 text-sm"
-          >
-            Assign
-          </button>
+              className="text-purple-600 hover:text-purple-800 text-sm"
+            >
+              Assign
+            </button>
             <button
               onClick={() => handleDeleteClick(queueRow.queueId)}
               className="text-red-600 hover:text-red-800 text-sm"
@@ -338,15 +348,21 @@ const ProductionPage = () => {
     },
     {
       label: "Queued",
-      value: productionQueues.filter((q: any) => q.status === "QUEUED").length.toString(),
+      value: productionQueues
+        .filter((q: any) => q.status === "QUEUED")
+        .length.toString(),
     },
     {
       label: "In Production",
-      value: productionQueues.filter((q: any) => q.status === "IN_PRODUCTION").length.toString(),
+      value: productionQueues
+        .filter((q: any) => q.status === "IN_PRODUCTION")
+        .length.toString(),
     },
     {
       label: "Ready for Shipment",
-      value: productionQueues.filter((q: any) => q.status === "READY_FOR_SHIPMENT").length.toString(),
+      value: productionQueues
+        .filter((q: any) => q.status === "READY_FOR_SHIPMENT")
+        .length.toString(),
     },
   ];
 
@@ -417,9 +433,11 @@ const ProductionPage = () => {
         </div>
       ) : error ? (
         <div className="bg-white rounded-lg border border-red-200 p-12 text-center">
-          <div className="text-red-600 font-medium mb-2">Error loading production queue</div>
+          <div className="text-red-600 font-medium mb-2">
+            Error loading production queue
+          </div>
           <div className="text-sm text-gray-500">
-            {error && 'data' in error
+            {error && "data" in error
               ? (error.data as any)?.message || "Failed to load data"
               : "Please try again"}
           </div>
@@ -432,16 +450,16 @@ const ProductionPage = () => {
         </div>
       ) : productionQueues.length === 0 ? (
         <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
-          <div className="text-gray-500 mb-2">No production queue items found</div>
+          <div className="text-gray-500 mb-2">
+            No production queue items found
+          </div>
           <div className="text-sm text-gray-400">
             Click "Add to Queue" to create your first production queue item
           </div>
         </div>
       ) : filteredData.length === 0 ? (
         <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
-          <div className="text-gray-500">
-            No items match your filters
-          </div>
+          <div className="text-gray-500">No items match your filters</div>
           <div className="text-sm text-gray-400 mt-2">
             Showing {filteredData.length} of {productionQueues.length} items
           </div>
@@ -466,7 +484,7 @@ const ProductionPage = () => {
           setShowAddModal(false);
           resetForm();
         }}
-        showCloseButton={true}
+        showCloseButton
         className="max-w-2xl"
       >
         <div className="p-6">
@@ -593,7 +611,7 @@ const ProductionPage = () => {
           setSelectedItem(null);
           resetForm();
         }}
-        showCloseButton={true}
+        showCloseButton
         className="max-w-2xl"
       >
         <div className="p-6">
@@ -722,7 +740,7 @@ const ProductionPage = () => {
           setSelectedItem(null);
           resetForm();
         }}
-        showCloseButton={true}
+        showCloseButton
         className="max-w-md"
       >
         <div className="p-6">
@@ -790,7 +808,7 @@ const ProductionPage = () => {
           setSelectedItem(null);
           resetForm();
         }}
-        showCloseButton={true}
+        showCloseButton
         className="max-w-md"
       >
         <div className="p-6">

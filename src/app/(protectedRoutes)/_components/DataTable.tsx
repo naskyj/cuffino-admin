@@ -1,12 +1,13 @@
 "use client";
 
-import { cn } from "@/lib/utils";
 import React from "react";
+
+import { cn } from "@/lib/utils";
 
 interface Column<T> {
   key: keyof T | string;
   header: string;
-  render?: (value: unknown, row: T) => React.ReactNode;
+  render?: (_value: unknown, _row: T) => React.ReactNode;
   className?: string;
 }
 
@@ -67,7 +68,10 @@ function DataTable<T>({
             return (
               <tr
                 key={rowKey}
-                className={cn("hover:bg-gray-50", onRowClick && "cursor-pointer")}
+                className={cn(
+                  "hover:bg-gray-50",
+                  onRowClick && "cursor-pointer"
+                )}
                 onClick={() => onRowClick?.(row)}
               >
                 {columns.map((column) => {
@@ -81,7 +85,7 @@ function DataTable<T>({
                       )}
                     >
                       {column.render
-                        ? column.render(row[column.key as keyof T], row)
+                        ? column.render(row[column.key as keyof T], row as T)
                         : String(row[column.key as keyof T] || "")}
                     </td>
                   );

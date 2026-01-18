@@ -89,9 +89,7 @@ export const cartApi = baseSlice.injectEndpoints({
           imageTypes.forEach((type) => formData.append("imageTypes", type));
         }
         if (descriptions) {
-          descriptions.forEach((desc) =>
-            formData.append("descriptions", desc)
-          );
+          descriptions.forEach((desc) => formData.append("descriptions", desc));
         }
         return {
           url: `/cart/${userId}/add`,
@@ -139,7 +137,9 @@ export const cartApi = baseSlice.injectEndpoints({
         url: `/cart/${userId}/clear`,
         method: "DELETE",
       }),
-      invalidatesTags: (result, error, userId) => [{ type: "Cart", id: userId }],
+      invalidatesTags: (result, error, userId) => [
+        { type: "Cart", id: userId },
+      ],
     }),
 
     // Convert Cart to Order

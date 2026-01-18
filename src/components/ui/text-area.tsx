@@ -10,8 +10,10 @@ import {
 
 import { cn } from "@/lib/utils";
 
-interface TextAreaProps<T extends FieldValues = FieldValues>
-  extends Omit<React.ComponentProps<"textarea">, "name"> {
+interface TextAreaProps<T extends FieldValues = FieldValues> extends Omit<
+  React.ComponentProps<"textarea">,
+  "name"
+> {
   name: FieldPath<T>;
   control: Control<T>;
   label?: string;

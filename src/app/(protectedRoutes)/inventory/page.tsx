@@ -1,17 +1,19 @@
 "use client";
 
 import React, { useState } from "react";
-import { Button, Modal } from "@/components/ui";
+
 import ConfirmDialog from "@/components/ConfirmDialog";
-import { showToast } from "@/utilities/toast";
+import { Button, Modal } from "@/components/ui";
 import {
-  useGetAllInventoriesQuery,
-  useCreateInventoryMutation,
-  useUpdateInventoryMutation,
-  useDeleteInventoryMutation,
-  useGetAllProductsQuery,
   Inventory,
+  useCreateInventoryMutation,
+  useDeleteInventoryMutation,
+  useGetAllInventoriesQuery,
+  useGetAllProductsQuery,
+  useUpdateInventoryMutation,
 } from "@/store/api";
+import { showToast } from "@/utilities/toast";
+
 import DataTable from "../_components/DataTable";
 import PageHeader from "../_components/PageHeader";
 
@@ -21,10 +23,13 @@ const InventoryPage = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<number | null>(null);
-  const [selectedItem, setSelectedItem] = useState<any>(null);
+  const [selectedItem, setSelectedItem] = useState<Inventory | null>(null);
 
-  const { data: inventories = [], isLoading, refetch } =
-    useGetAllInventoriesQuery();
+  const {
+    data: inventories = [],
+    isLoading,
+    refetch,
+  } = useGetAllInventoriesQuery();
   const { data: products = [] } = useGetAllProductsQuery();
   const [createInventory] = useCreateInventoryMutation();
   const [updateInventory] = useUpdateInventoryMutation();
@@ -37,6 +42,16 @@ const InventoryPage = () => {
     unit: "",
     location: "",
   });
+
+  const resetForm = () => {
+    setFormData({
+      productId: "",
+      materialName: "",
+      quantity: "",
+      unit: "",
+      location: "",
+    });
+  };
 
   const handleAdd = async () => {
     try {
@@ -51,7 +66,7 @@ const InventoryPage = () => {
       setShowAddModal(false);
       resetForm();
       refetch();
-    } catch (error) {
+    } catch {
       showToast.error("Failed to create inventory item");
     }
   };
@@ -62,7 +77,9 @@ const InventoryPage = () => {
       await updateInventory({
         id: selectedItem.inventoryId,
         data: {
-          productId: formData.productId ? Number(formData.productId) : undefined,
+          productId: formData.productId
+            ? Number(formData.productId)
+            : undefined,
           materialName: formData.materialName,
           quantity: Number(formData.quantity),
           unit: formData.unit || undefined,
@@ -74,7 +91,7 @@ const InventoryPage = () => {
       setSelectedItem(null);
       resetForm();
       refetch();
-    } catch (error) {
+    } catch {
       showToast.error("Failed to update inventory item");
     }
   };
@@ -92,22 +109,12 @@ const InventoryPage = () => {
         refetch();
         setShowDeleteDialog(false);
         setItemToDelete(null);
-      } catch (error) {
+      } catch {
         showToast.error("Failed to delete inventory item");
         setShowDeleteDialog(false);
         setItemToDelete(null);
       }
     }
-  };
-
-  const resetForm = () => {
-    setFormData({
-      productId: "",
-      materialName: "",
-      quantity: "",
-      unit: "",
-      location: "",
-    });
   };
 
   const openEditModal = (item: any) => {
@@ -187,12 +194,14 @@ const InventoryPage = () => {
       render: (_value: unknown, row: Inventory) => (
         <div className="flex gap-2">
           <button
+            type="button"
             onClick={() => openEditModal(row)}
             className="text-blue-600 hover:text-blue-800 text-sm"
           >
             Edit
           </button>
           <button
+            type="button"
             onClick={() => handleDeleteClick(row.inventoryId)}
             className="text-red-600 hover:text-red-800 text-sm"
           >
@@ -224,11 +233,15 @@ const InventoryPage = () => {
     },
     {
       label: "Unique Materials",
-      value: new Set(inventories.map((inv: any) => inv.materialName)).size.toString(),
+      value: new Set(
+        inventories.map((inv: any) => inv.materialName)
+      ).size.toString(),
     },
     {
       label: "Low Stock",
-      value: inventories.filter((inv: any) => (inv.quantity || 0) < 10).length.toString(),
+      value: inventories
+        .filter((inv: any) => (inv.quantity || 0) < 10)
+        .length.toString(),
     },
   ];
 
@@ -251,9 +264,9 @@ const InventoryPage = () => {
 
       {/* Quick Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        {stats.map((stat, index) => (
+        {stats.map((stat) => (
           <div
-            key={index}
+            key={stat.label}
             className="bg-white rounded-lg border border-gray-200 p-4"
           >
             <div className="text-2xl font-bold text-gray-900">{stat.value}</div>
@@ -288,8 +301,8 @@ const InventoryPage = () => {
             data={filteredData}
             columns={columns}
             emptyMessage="No inventory items found"
-            onRowClick={(row) => {
-              console.log("Clicked inventory:", row);
+            onRowClick={() => {
+              // Row click handler
             }}
           />
         </div>
@@ -302,7 +315,7 @@ const InventoryPage = () => {
           setShowAddModal(false);
           resetForm();
         }}
-        showCloseButton={true}
+        showCloseButton
         className="max-w-2xl"
       >
         <div className="p-6">
@@ -410,7 +423,7 @@ const InventoryPage = () => {
           setSelectedItem(null);
           resetForm();
         }}
-        showCloseButton={true}
+        showCloseButton
         className="max-w-2xl"
       >
         <div className="p-6">

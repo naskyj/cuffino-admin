@@ -131,15 +131,18 @@ export const orderApi = baseSlice.injectEndpoints({
     >({
       query: ({ criteria, page = 0, size = 10, sort }) => {
         const params = new URLSearchParams();
-        if (criteria.customerId)
+        if (criteria.customerId) {
           params.append("customerId", criteria.customerId.toString());
+        }
         if (criteria.status) params.append("status", criteria.status);
         if (criteria.startDate) params.append("startDate", criteria.startDate);
         if (criteria.endDate) params.append("endDate", criteria.endDate);
-        if (criteria.minTotal)
+        if (criteria.minTotal) {
           params.append("minTotal", criteria.minTotal.toString());
-        if (criteria.maxTotal)
+        }
+        if (criteria.maxTotal) {
           params.append("maxTotal", criteria.maxTotal.toString());
+        }
         params.append("page", page.toString());
         params.append("size", size.toString());
         if (sort) params.append("sort", sort);

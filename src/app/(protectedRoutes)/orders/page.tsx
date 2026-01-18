@@ -1,14 +1,16 @@
 "use client";
 
 import React, { useState } from "react";
-import { Button } from "@/components/ui";
+
 import ConfirmDialog from "@/components/ConfirmDialog";
-import { showToast } from "@/utilities/toast";
+import { Button } from "@/components/ui";
 import {
+  useDeleteOrderMutation,
   useGetAllOrdersQuery,
   useUpdateOrderStatusMutation,
-  useDeleteOrderMutation,
 } from "@/store/api";
+import { showToast } from "@/utilities/toast";
+
 import DataTable from "../_components/DataTable";
 import PageHeader from "../_components/PageHeader";
 
@@ -128,7 +130,9 @@ const OrdersPage = () => {
             </button>
             <select
               value={orderRow.status || "PENDING"}
-              onChange={(e) => handleStatusUpdate(orderRow.orderId, e.target.value)}
+              onChange={(e) =>
+                handleStatusUpdate(orderRow.orderId, e.target.value)
+              }
               className="text-xs border border-gray-300 rounded px-2 py-1"
             >
               <option value="PENDING">Pending</option>
@@ -155,7 +159,8 @@ const OrdersPage = () => {
       order.orderId?.toString().includes(searchTerm) ||
       order.customerUsername?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus =
-      !statusFilter || order.status?.toUpperCase() === statusFilter.toUpperCase();
+      !statusFilter ||
+      order.status?.toUpperCase() === statusFilter.toUpperCase();
     return matchesSearch && matchesStatus;
   });
 
@@ -166,15 +171,21 @@ const OrdersPage = () => {
     },
     {
       label: "Pending",
-      value: orders.filter((o: any) => o.status === "PENDING").length.toString(),
+      value: orders
+        .filter((o: any) => o.status === "PENDING")
+        .length.toString(),
     },
     {
       label: "Processing",
-      value: orders.filter((o: any) => o.status === "PROCESSING").length.toString(),
+      value: orders
+        .filter((o: any) => o.status === "PROCESSING")
+        .length.toString(),
     },
     {
       label: "Delivered",
-      value: orders.filter((o: any) => o.status === "DELIVERED").length.toString(),
+      value: orders
+        .filter((o: any) => o.status === "DELIVERED")
+        .length.toString(),
     },
   ];
 

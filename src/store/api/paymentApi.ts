@@ -79,7 +79,13 @@ export const paymentApi = baseSlice.injectEndpoints({
         idempotencyKey?: string;
       }
     >({
-      query: ({ payload, stripeSignature, signature, gateway, idempotencyKey }) => ({
+      query: ({
+        payload,
+        stripeSignature,
+        signature,
+        gateway,
+        idempotencyKey,
+      }) => ({
         url: "/payments/webhook",
         method: "POST",
         body: payload,

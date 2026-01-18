@@ -1,14 +1,16 @@
 "use client";
 
 import React, { useState } from "react";
+
 import { Button, Modal } from "@/components/ui";
-import { showToast } from "@/utilities/toast";
 import {
+  ReturnStatus,
   useGetAllOrdersQuery,
   useGetReturnsByOrderQuery,
   useUpdateReturnStatusMutation,
-  ReturnStatus,
 } from "@/store/api";
+import { showToast } from "@/utilities/toast";
+
 import DataTable from "../_components/DataTable";
 import PageHeader from "../_components/PageHeader";
 
@@ -22,10 +24,11 @@ const ReturnsPage = () => {
   const [resolution, setResolution] = useState("");
 
   const { data: orders = [] } = useGetAllOrdersQuery();
-  const { data: returns = [], isLoading, refetch } = useGetReturnsByOrderQuery(
-    selectedOrderId!,
-    { skip: !selectedOrderId }
-  );
+  const {
+    data: returns = [],
+    isLoading,
+    refetch,
+  } = useGetReturnsByOrderQuery(selectedOrderId!, { skip: !selectedOrderId });
   const [updateReturnStatus] = useUpdateReturnStatusMutation();
 
   // Fetch returns for all orders when no specific order is selected
@@ -77,13 +80,7 @@ const ReturnsPage = () => {
     const csv = [
       ["Return ID", "Order ID", "Reason", "Status", "Created At"].join(","),
       ...returns.map((r: any) =>
-        [
-          r.returnId,
-          r.orderId,
-          r.reason,
-          r.status,
-          r.createdAt,
-        ].join(",")
+        [r.returnId, r.orderId, r.reason, r.status, r.createdAt].join(",")
       ),
     ].join("\n");
 
@@ -170,15 +167,21 @@ const ReturnsPage = () => {
     },
     {
       label: "Pending",
-      value: returns.filter((r: any) => r.status === "PENDING").length.toString(),
+      value: returns
+        .filter((r: any) => r.status === "PENDING")
+        .length.toString(),
     },
     {
       label: "Approved",
-      value: returns.filter((r: any) => r.status === "APPROVED").length.toString(),
+      value: returns
+        .filter((r: any) => r.status === "APPROVED")
+        .length.toString(),
     },
     {
       label: "Refunded",
-      value: returns.filter((r: any) => r.status === "REFUNDED").length.toString(),
+      value: returns
+        .filter((r: any) => r.status === "REFUNDED")
+        .length.toString(),
     },
   ];
 
@@ -236,7 +239,9 @@ const ReturnsPage = () => {
             </select>
             <select
               value={selectedOrderId || ""}
-              onChange={(e) => setSelectedOrderId(Number(e.target.value) || null)}
+              onChange={(e) =>
+                setSelectedOrderId(Number(e.target.value) || null)
+              }
               className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
             >
               <option value="">All Orders</option>
@@ -276,7 +281,7 @@ const ReturnsPage = () => {
           setSelectedReturn(null);
           setResolution("");
         }}
-        showCloseButton={true}
+        showCloseButton
         className="max-w-md"
       >
         <div className="p-6">

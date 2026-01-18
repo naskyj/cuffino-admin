@@ -36,9 +36,7 @@ const View = ({ children }: { children: React.ReactNode }) => {
     if (userDetails?.creator) {
       setUserProfile({
         name:
-          userDetails.creator.first_name ||
-          userDetails.creator.email ||
-          "User",
+          userDetails.creator.first_name || userDetails.creator.email || "User",
         email: userDetails.creator.email,
         avatar: userDetails.creator.profile_picture,
       });

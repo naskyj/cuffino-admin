@@ -1,8 +1,10 @@
 "use client";
 
 import React, { useState } from "react";
+
 import { Button } from "@/components/ui";
 import { useGetAllOrdersQuery } from "@/store/api";
+
 import DataTable from "../_components/DataTable";
 import PageHeader from "../_components/PageHeader";
 
@@ -16,21 +18,28 @@ const PaymentsPage = () => {
   // Since OrderResponseDTO doesn't include payments, we'll derive payment info from order status and totals
   // For orders with status PAID or higher, we assume payment was made
   const paymentsData = orders
-    .filter((order: any) => 
-      order.status === "PAID" || 
-      order.status === "PROCESSING" || 
-      order.status === "SHIPPED" || 
-      order.status === "DELIVERED"
+    .filter(
+      (order: any) =>
+        order.status === "PAID" ||
+        order.status === "PROCESSING" ||
+        order.status === "SHIPPED" ||
+        order.status === "DELIVERED"
     )
     .map((order: any) => ({
       transactionId: `ORD-${order.orderId}`,
       orderId: order.orderId,
       customer: order.customerUsername || `User ${order.customerId}`,
-      amountPaid: order.finalizedTotal || order.totalPrice + order.tax + order.shippingFee - order.discountTotal,
+      amountPaid:
+        order.finalizedTotal ||
+        order.totalPrice + order.tax + order.shippingFee - order.discountTotal,
       paymentMethod: "CARD", // Default since we don't have this info
-      paymentStatus: order.status === "PAID" || order.status === "PROCESSING" || order.status === "SHIPPED" || order.status === "DELIVERED" 
-        ? "SUCCEEDED" 
-        : "PENDING",
+      paymentStatus:
+        order.status === "PAID" ||
+        order.status === "PROCESSING" ||
+        order.status === "SHIPPED" ||
+        order.status === "DELIVERED"
+          ? "SUCCEEDED"
+          : "PENDING",
       paymentDate: order.orderDate || new Date().toISOString(),
     }));
 
@@ -88,7 +97,9 @@ const PaymentsPage = () => {
         return (
           <div className="flex items-center gap-2">
             <span>{getMethodIcon(methodValue)}</span>
-            <span className="capitalize">{methodValue?.replace("_", " ") || "N/A"}</span>
+            <span className="capitalize">
+              {methodValue?.replace("_", " ") || "N/A"}
+            </span>
           </div>
         );
       },
@@ -134,7 +145,10 @@ const PaymentsPage = () => {
   });
 
   const totalRevenue = paymentsData
-    .filter((p: any) => p.paymentStatus === "SUCCEEDED" || p.paymentStatus === "COMPLETED")
+    .filter(
+      (p: any) =>
+        p.paymentStatus === "SUCCEEDED" || p.paymentStatus === "COMPLETED"
+    )
     .reduce((sum: number, p: any) => sum + (p.amountPaid || 0), 0);
 
   const stats = [
@@ -144,17 +158,24 @@ const PaymentsPage = () => {
     },
     {
       label: "Completed",
-      value: paymentsData.filter(
-        (p: any) => p.paymentStatus === "SUCCEEDED" || p.paymentStatus === "COMPLETED"
-      ).length.toString(),
+      value: paymentsData
+        .filter(
+          (p: any) =>
+            p.paymentStatus === "SUCCEEDED" || p.paymentStatus === "COMPLETED"
+        )
+        .length.toString(),
     },
     {
       label: "Pending",
-      value: paymentsData.filter((p: any) => p.paymentStatus === "PENDING").length.toString(),
+      value: paymentsData
+        .filter((p: any) => p.paymentStatus === "PENDING")
+        .length.toString(),
     },
     {
       label: "Failed",
-      value: paymentsData.filter((p: any) => p.paymentStatus === "FAILED").length.toString(),
+      value: paymentsData
+        .filter((p: any) => p.paymentStatus === "FAILED")
+        .length.toString(),
     },
   ];
 
