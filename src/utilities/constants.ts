@@ -248,7 +248,8 @@ export const CURRENCY_VALUES = CURRENCY_OPTIONS.map(
 
 // Environment variables
 export const ENV_VARS = {
-  API_URL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api",
+  API_URL:
+    process.env.NEXT_PUBLIC_API_URL || "https://cuffino.com/cuffino/api/v1",
   APP_URL: process.env.NEXT_PUBLIC_APP_URL || "https://unlokr.app",
   CLOUDINARY_API_KEY:
     process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY || "1234567890",

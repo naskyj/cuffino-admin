@@ -1,12 +1,12 @@
 "use client";
 
-import React from "react";
 import { cn } from "@/lib/utils";
+import React from "react";
 
 interface Column<T> {
   key: keyof T | string;
   header: string;
-  render?: (value: any, row: T) => React.ReactNode;
+  render?: (value: unknown, row: T) => React.ReactNode;
   className?: string;
 }
 
@@ -19,7 +19,7 @@ interface DataTableProps<T> {
   onRowClick?: (row: T) => void;
 }
 
-function DataTable<T extends Record<string, any>>({
+function DataTable<T>({
   data,
   columns,
   loading = false,
@@ -30,7 +30,7 @@ function DataTable<T extends Record<string, any>>({
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
       </div>
     );
   }
@@ -48,9 +48,9 @@ function DataTable<T extends Record<string, any>>({
       <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
           <tr>
-            {columns.map((column, index) => (
+            {columns.map((column) => (
               <th
-                key={index}
+                key={String(column.key)}
                 className={cn(
                   "px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider",
                   column.className
@@ -62,30 +62,33 @@ function DataTable<T extends Record<string, any>>({
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
-          {data.map((row, rowIndex) => (
-            <tr
-              key={rowIndex}
-              className={cn(
-                "hover:bg-gray-50",
-                onRowClick && "cursor-pointer"
-              )}
-              onClick={() => onRowClick?.(row)}
-            >
-              {columns.map((column, colIndex) => (
-                <td
-                  key={colIndex}
-                  className={cn(
-                    "px-6 py-4 whitespace-nowrap text-sm text-gray-900",
-                    column.className
-                  )}
-                >
-                  {column.render
-                    ? column.render(row[column.key as keyof T], row)
-                    : String(row[column.key as keyof T] || "")}
-                </td>
-              ))}
-            </tr>
-          ))}
+          {data.map((row, rowIndex) => {
+            const rowKey = (row as { id?: string | number } & T).id ?? rowIndex;
+            return (
+              <tr
+                key={rowKey}
+                className={cn("hover:bg-gray-50", onRowClick && "cursor-pointer")}
+                onClick={() => onRowClick?.(row)}
+              >
+                {columns.map((column) => {
+                  const colKey = `${String(rowKey)}-${String(column.key)}`;
+                  return (
+                    <td
+                      key={colKey}
+                      className={cn(
+                        "px-6 py-4 whitespace-nowrap text-sm text-gray-900",
+                        column.className
+                      )}
+                    >
+                      {column.render
+                        ? column.render(row[column.key as keyof T], row)
+                        : String(row[column.key as keyof T] || "")}
+                    </td>
+                  );
+                })}
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>

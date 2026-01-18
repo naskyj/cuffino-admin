@@ -19,7 +19,7 @@ import {
 
 const baseQuery = fetchBaseQuery({
   baseUrl: ENV_VARS.API_URL,
-  prepareHeaders: async (headers) => {
+  prepareHeaders: async (headers, { extra, endpoint }) => {
     let token = getClientCookie(AUTH_COOKIE_NAMES.token);
 
     if (!token) {
@@ -30,7 +30,12 @@ const baseQuery = fetchBaseQuery({
       headers.set("Authorization", `Bearer ${token}`);
     }
 
-    headers.set("Content-Type", "application/json");
+    // Only set Content-Type if not already set
+    // RTK Query will automatically handle FormData and not set Content-Type for it
+    // So we only set it for JSON requests
+    if (!headers.has("Content-Type")) {
+      headers.set("Content-Type", "application/json");
+    }
     return headers;
   },
 });
@@ -66,6 +71,18 @@ export const baseSlice = createApi({
     "Profile",
     "Upload",
     "Products",
+    "ProductCategories",
+    "ProductCustomizations",
+    "Orders",
+    "Cart",
+    "Payments",
+    "Logistics",
+    "Returns",
+    "Production",
+    "Inventory",
+    "Addresses",
+    "Measurements",
+    "Images",
     "Transactions",
     "BankAccounts",
     "Notification",

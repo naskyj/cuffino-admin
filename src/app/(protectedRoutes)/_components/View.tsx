@@ -1,10 +1,12 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
 
 import { Modal } from "@/components/ui";
-import { clearAllAuthCookies } from "@/utilities";
+import { logout } from "@/store/slices/authSlice";
+import { clearAllAuthCookies, getUserDetailsFromCookie } from "@/utilities";
 
 import {
   DashboardIcon,
@@ -21,7 +23,27 @@ import SideBar from "./SideBar";
 const View = ({ children }: { children: React.ReactNode }) => {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [userProfile, setUserProfile] = useState<{
+    name: string;
+    email?: string;
+    avatar?: string;
+  } | null>(null);
   const router = useRouter();
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    const userDetails = getUserDetailsFromCookie();
+    if (userDetails?.creator) {
+      setUserProfile({
+        name:
+          userDetails.creator.first_name ||
+          userDetails.creator.email ||
+          "User",
+        email: userDetails.creator.email,
+        avatar: userDetails.creator.profile_picture,
+      });
+    }
+  }, []);
 
   const sidebarItems = [
     {
@@ -31,15 +53,39 @@ const View = ({ children }: { children: React.ReactNode }) => {
       icon: <DashboardIcon className="w-5 h-5" />,
     },
     {
+      id: "orders",
+      title: "Orders",
+      route: "/orders",
+      icon: <OrdersIcon className="w-5 h-5" />,
+    },
+    {
+      id: "products",
+      title: "Products",
+      route: "/products",
+      icon: <ProductsIcon className="w-5 h-5" />,
+    },
+    {
+      id: "production",
+      title: "Production",
+      route: "/production",
+      icon: <ProductsIcon className="w-5 h-5" />,
+    },
+    {
+      id: "inventory",
+      title: "Inventory",
+      route: "/inventory",
+      icon: <ProductsIcon className="w-5 h-5" />,
+    },
+    {
       id: "logistics",
       title: "Logistics",
       route: "/logistics",
       icon: <LogisticsIcon className="w-5 h-5" />,
     },
     {
-      id: "orders",
-      title: "Orders",
-      route: "/orders",
+      id: "returns",
+      title: "Returns",
+      route: "/returns",
       icon: <OrdersIcon className="w-5 h-5" />,
     },
     {
@@ -47,12 +93,6 @@ const View = ({ children }: { children: React.ReactNode }) => {
       title: "Payments",
       route: "/payments",
       icon: <PaymentsIcon className="w-5 h-5" />,
-    },
-    {
-      id: "products",
-      title: "Products",
-      route: "/products",
-      icon: <ProductsIcon className="w-5 h-5" />,
     },
     {
       id: "users",
@@ -68,8 +108,9 @@ const View = ({ children }: { children: React.ReactNode }) => {
 
   const confirmLogout = () => {
     clearAllAuthCookies();
+    dispatch(logout());
     setShowLogoutModal(false);
-    router.push("/sign-in");
+    router.push("/");
   };
 
   const cancelLogout = () => {
@@ -103,7 +144,7 @@ const View = ({ children }: { children: React.ReactNode }) => {
           <SideBar
             items={sidebarItems}
             onLogout={handleLogout}
-            // userProfile={userProfile}
+            userProfile={userProfile || undefined}
           />
         </div>
 

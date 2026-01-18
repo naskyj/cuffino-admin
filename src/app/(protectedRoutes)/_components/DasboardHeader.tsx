@@ -54,12 +54,13 @@ const DasboardHeader: React.FC<DasboardHeaderProps> = ({ onMenuClick }) => {
           onClick={() => router.push("/account")}
           title={user?.name || "User"}
         >
-          <img
+          <Image
             src={avatarUrl}
             alt="avatar"
             width={32}
             height={32}
             className="rounded-full"
+            unoptimized
           />
         </button>
         <button type="button" className="block lg:hidden" onClick={onMenuClick}>
