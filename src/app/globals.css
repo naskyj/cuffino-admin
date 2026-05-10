@@ -1,0 +1,15 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --black: 0 0% 0%;
+  --white: 0 0% 100%;
+  --primary: 20 41% 47%;
+}
+
+body {
+  color: hsl(var(--foreground));
+  background: hsl(var(--background));
+  font-family: var(--font-outfit), system-ui, sans-serif;
+}
