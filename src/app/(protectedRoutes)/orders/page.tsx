@@ -137,43 +137,6 @@ const OrdersPage = () => {
     }
   };
 
-  const fabricKeywords = ["fabric", "material", "textile"];
-
-  const formatFabricSummary = (
-    items?: {
-      defaultFabrics?: { materialName: string }[];
-      customerSelectedFabrics?: { materialName: string }[];
-      customizations?: { name?: string; value: string }[];
-    }[]
-  ) => {
-    if (!items || items.length === 0) {
-      return "No fabrics";
-    }
-
-    const defaultNames = items.flatMap((item) =>
-      (item.defaultFabrics || []).map((fabric) => fabric.materialName)
-    );
-
-    // Prefer inventory-based customer selections; fall back to customization values
-    const selectedNames = items.flatMap((item) => {
-      if (item.customerSelectedFabrics && item.customerSelectedFabrics.length > 0) {
-        return item.customerSelectedFabrics.map((fabric) => fabric.materialName);
-      }
-      return (item.customizations || [])
-        .filter((c) => fabricKeywords.some((kw) => c.name?.toLowerCase().includes(kw)))
-        .map((c) => c.value);
-    });
-
-    const parts = [];
-    if (selectedNames.length > 0) {
-      parts.push(`Customer: ${Array.from(new Set(selectedNames)).join(", ")}`);
-    } else if (defaultNames.length > 0) {
-      parts.push(`Default: ${Array.from(new Set(defaultNames)).join(", ")}`);
-    }
-
-    return parts.length > 0 ? parts.join(" | ") : "No fabrics";
-  };
-
   const handleDeleteClick = (orderId: number) => {
     setOrderToDelete(orderId);
     setShowDeleteDialog(true);
@@ -216,28 +179,6 @@ const OrdersPage = () => {
           0
         );
         return totalQty.toString();
-      },
-    },
-    {
-      key: "fabrics",
-      header: "Fabrics",
-      render: (_value: unknown, row: unknown) => {
-        const orderRow = row as {
-          items?: {
-            defaultFabrics?: { materialName: string }[];
-            customerSelectedFabrics?: { materialName: string }[];
-            customizations?: { name?: string; value: string }[];
-          }[];
-        };
-
-        return (
-          <span
-            className="block max-w-xs truncate"
-            title={formatFabricSummary(orderRow.items)}
-          >
-            {formatFabricSummary(orderRow.items)}
-          </span>
-        );
       },
     },
     {
@@ -369,7 +310,6 @@ const OrdersPage = () => {
                   [
                     "Order ID",
                     "Customer",
-                    "Fabrics",
                     "Total Price",
                     "Status",
                     "Order Date",
@@ -378,7 +318,6 @@ const OrdersPage = () => {
                     [
                       o.orderId,
                       o.customerUsername ?? o.customerId,
-                      `"${formatFabricSummary(o.items).replace(/"/g, '""')}"`,
                       o.totalPrice,
                       o.status,
                       o.orderDate,
