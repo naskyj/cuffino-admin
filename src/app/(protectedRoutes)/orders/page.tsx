@@ -137,10 +137,13 @@ const OrdersPage = () => {
     }
   };
 
+  const fabricKeywords = ["fabric", "material", "textile"];
+
   const formatFabricSummary = (
     items?: {
       defaultFabrics?: { materialName: string }[];
       customerSelectedFabrics?: { materialName: string }[];
+      customizations?: { name?: string; value: string }[];
     }[]
   ) => {
     if (!items || items.length === 0) {
@@ -150,16 +153,22 @@ const OrdersPage = () => {
     const defaultNames = items.flatMap((item) =>
       (item.defaultFabrics || []).map((fabric) => fabric.materialName)
     );
-    const selectedNames = items.flatMap((item) =>
-      (item.customerSelectedFabrics || []).map((fabric) => fabric.materialName)
-    );
+
+    // Prefer inventory-based customer selections; fall back to customization values
+    const selectedNames = items.flatMap((item) => {
+      if (item.customerSelectedFabrics && item.customerSelectedFabrics.length > 0) {
+        return item.customerSelectedFabrics.map((fabric) => fabric.materialName);
+      }
+      return (item.customizations || [])
+        .filter((c) => fabricKeywords.some((kw) => c.name?.toLowerCase().includes(kw)))
+        .map((c) => c.value);
+    });
 
     const parts = [];
-    if (defaultNames.length > 0) {
-      parts.push(`Default: ${Array.from(new Set(defaultNames)).join(", ")}`);
-    }
     if (selectedNames.length > 0) {
-      parts.push(`Selected: ${Array.from(new Set(selectedNames)).join(", ")}`);
+      parts.push(`Customer: ${Array.from(new Set(selectedNames)).join(", ")}`);
+    } else if (defaultNames.length > 0) {
+      parts.push(`Default: ${Array.from(new Set(defaultNames)).join(", ")}`);
     }
 
     return parts.length > 0 ? parts.join(" | ") : "No fabrics";
@@ -199,10 +208,14 @@ const OrdersPage = () => {
     },
     {
       key: "items",
-      header: "Items",
+      header: "Qty",
       render: (_value: unknown, row: unknown) => {
-        const orderRow = row as { items?: unknown[] };
-        return orderRow.items?.length?.toString() || "0";
+        const orderRow = row as { items?: { quantity?: number }[] };
+        const totalQty = (orderRow.items || []).reduce(
+          (sum, item) => sum + (item.quantity || 1),
+          0
+        );
+        return totalQty.toString();
       },
     },
     {
@@ -213,6 +226,7 @@ const OrdersPage = () => {
           items?: {
             defaultFabrics?: { materialName: string }[];
             customerSelectedFabrics?: { materialName: string }[];
+            customizations?: { name?: string; value: string }[];
           }[];
         };
 
