@@ -182,8 +182,8 @@ const OrdersPage = () => {
       },
     },
     {
-      key: "totalPrice",
-      header: "Total",
+      key: "grandTotal",
+      header: "Grand Total",
       render: (value: unknown) => `$${(value as number)?.toFixed(2) || "0.00"}`,
     },
     {
@@ -310,7 +310,7 @@ const OrdersPage = () => {
                   [
                     "Order ID",
                     "Customer",
-                    "Total Price",
+                    "Grand Total",
                     "Status",
                     "Order Date",
                   ].join(","),
@@ -318,7 +318,7 @@ const OrdersPage = () => {
                     [
                       o.orderId,
                       o.customerUsername ?? o.customerId,
-                      o.totalPrice,
+                      o.grandTotal,
                       o.status,
                       o.orderDate,
                     ].join(",")

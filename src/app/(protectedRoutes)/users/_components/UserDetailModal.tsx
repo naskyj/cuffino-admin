@@ -449,12 +449,7 @@ export default function UserDetailModal({
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <span className="text-sm font-bold text-gray-900">
-                              $
-                              {(
-                                order.finalizedTotal ||
-                                order.totalPrice ||
-                                0
-                              ).toFixed(2)}
+                              ${(order.grandTotal ?? order.totalPrice ?? 0).toFixed(2)}
                             </span>
                           </td>
                         </tr>

@@ -73,6 +73,7 @@ export interface OrderResponseDTO {
   discountTotal: number;
   currency: string;
   finalizedTotal?: number;
+  grandTotal: number;
   status: OrderStatusEnum;
   orderDate: string;
   shippingAddress?: any;

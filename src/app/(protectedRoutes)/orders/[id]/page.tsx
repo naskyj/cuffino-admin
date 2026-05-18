@@ -232,8 +232,8 @@ export default function OrderDetailsPage() {
           <div>
             <span className="text-gray-500">Discount:</span> -{formatCurrency(order.discountTotal)}
           </div>
-          <div className="md:col-span-2 font-semibold text-gray-900">
-            Grand total: {formatCurrency(order.finalizedTotal ?? order.totalPrice)}
+          <div className="md:col-span-2 pt-3 border-t border-gray-100 font-semibold text-gray-900 text-base">
+            Grand total: {formatCurrency(order.grandTotal)}
           </div>
         </div>
       </div>

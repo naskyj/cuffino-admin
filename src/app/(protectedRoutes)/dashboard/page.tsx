@@ -31,6 +31,7 @@ type DashboardOrder = {
   status?: string;
   customerUsername?: string;
   totalPrice?: number;
+  grandTotal?: number;
   orderDate?: string;
   items?: {
     productId?: number;
@@ -87,8 +88,8 @@ const DashboardPage = () => {
       value: orders
         ? `$${orders
             .reduce(
-              (sum: number, order: { totalPrice?: number }) =>
-                sum + (order.totalPrice || 0),
+              (sum: number, order: { grandTotal?: number; totalPrice?: number }) =>
+                sum + (order.grandTotal ?? order.totalPrice ?? 0),
               0
             )
             .toFixed(2)}`
@@ -147,7 +148,7 @@ const DashboardPage = () => {
       const dayKey = new Date(order.orderDate).toISOString().slice(0, 10);
       const match = bucket.get(dayKey);
       if (match) {
-        match.revenue += order.totalPrice || 0;
+        match.revenue += order.grandTotal ?? order.totalPrice ?? 0;
       }
     });
 
@@ -264,6 +265,7 @@ const DashboardPage = () => {
                       status?: string;
                       customerUsername?: string;
                       totalPrice?: number;
+                      grandTotal?: number;
                       orderDate?: string;
                     }) => (
                       <div
@@ -276,7 +278,7 @@ const DashboardPage = () => {
                           </p>
                           <p className="text-xs text-gray-500">
                             {order.customerUsername || "Customer"} - $
-                            {order.totalPrice?.toFixed(2) || "0.00"}
+                            {(order.grandTotal ?? order.totalPrice ?? 0).toFixed(2)}
                           </p>
                         </div>
                         <span className="text-xs text-gray-400">
