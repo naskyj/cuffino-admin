@@ -93,6 +93,12 @@ const View = ({ children }: { children: React.ReactNode }) => {
       icon: <PaymentsIcon className="w-5 h-5" />,
     },
     {
+      id: "support",
+      title: "Support",
+      route: "/support",
+      icon: <OrdersIcon className="w-5 h-5" />,
+    },
+    {
       id: "users",
       title: "Users",
       route: "/users",

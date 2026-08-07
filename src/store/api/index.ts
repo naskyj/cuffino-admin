@@ -10,4 +10,5 @@ export * from "./paymentApi";
 export * from "./productApi";
 export * from "./productionApi";
 export * from "./returnApi";
+export * from "./supportApi";
 export * from "./userApi";

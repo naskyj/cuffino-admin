@@ -253,6 +253,25 @@ export const orderApi = baseSlice.injectEndpoints({
         { type: "Orders", id: orderId },
       ],
     }),
+
+    // Cancel order with refund (A1: SOP_CANCELLATIONS.md - one atomic call instead of the old
+    // "refund in Stripe, then remember to update the order" two-step manual process).
+    cancelOrderWithRefund: builder.mutation<
+      {
+        orderId: number;
+        totalRefunded: number;
+        taxRefunded: number;
+        baseAmountRefunded: number;
+      },
+      { id: number; refundAmount?: number | null; reason: string }
+    >({
+      query: ({ id, refundAmount, reason }) => ({
+        url: `/order/${id}/cancel`,
+        method: "POST",
+        body: { refundAmount: refundAmount || null, reason },
+      }),
+      invalidatesTags: (result, error, { id }) => [{ type: "Orders", id }, "Orders"],
+    }),
   }),
 });
 
@@ -270,4 +289,5 @@ export const {
   useDeleteOrderMutation,
   useUpdateOrderItemMutation,
   useUpdateShippingAddressMutation,
+  useCancelOrderWithRefundMutation,
 } = orderApi;

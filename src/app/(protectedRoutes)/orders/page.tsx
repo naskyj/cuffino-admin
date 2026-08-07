@@ -7,6 +7,7 @@ import ConfirmDialog from "@/components/ConfirmDialog";
 import { Button, Modal } from "@/components/ui";
 import {
   useAssignProductionByOrderMutation,
+  useCancelOrderWithRefundMutation,
   useDeleteOrderMutation,
   useGetAllDesignersQuery,
   useGetAllOrdersQuery,
@@ -33,11 +34,17 @@ const OrdersPage = () => {
     notes: "",
   });
 
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [orderToCancel, setOrderToCancel] = useState<number | null>(null);
+  const [cancelRefundAmount, setCancelRefundAmount] = useState("");
+  const [cancelReason, setCancelReason] = useState("");
+
   const { data: orders = [], isLoading, refetch } = useGetAllOrdersQuery();
   const { data: designers = [] } = useGetAllDesignersQuery();
   const { data: productionQueues = [] } = useGetAllProductionQueuesQuery();
   const [deleteOrder] = useDeleteOrderMutation();
   const [assignProductionByOrder] = useAssignProductionByOrderMutation();
+  const [cancelOrderWithRefund, { isLoading: isCancelling }] = useCancelOrderWithRefundMutation();
 
   const getStatusColor = (status: string) => {
     switch (status?.toUpperCase()) {
@@ -64,6 +71,44 @@ const OrdersPage = () => {
 
   const canAssignDesigner = (status?: string) =>
     (status || "").toUpperCase() === "PAID";
+
+  const canCancel = (status?: string) =>
+    !["CANCELLED", "DELIVERED"].includes((status || "").toUpperCase());
+
+  const openCancelModal = (orderId: number) => {
+    setOrderToCancel(orderId);
+    setCancelRefundAmount("");
+    setCancelReason("");
+    setShowCancelModal(true);
+  };
+
+  // A1: cancels and, if a refund amount is given, issues it in the same atomic call
+  // (SOP_CANCELLATIONS.md) - leave the amount blank for a pre-payment cancellation with
+  // nothing to refund.
+  const handleCancelOrder = async () => {
+    if (!orderToCancel) return;
+    if (!cancelReason.trim()) {
+      showToast.error("A reason is required for the audit record");
+      return;
+    }
+    try {
+      const result = await cancelOrderWithRefund({
+        id: orderToCancel,
+        refundAmount: cancelRefundAmount ? Number(cancelRefundAmount) : null,
+        reason: cancelReason.trim(),
+      }).unwrap();
+      showToast.success(
+        result.totalRefunded
+          ? `Order cancelled - refunded $${result.totalRefunded.toFixed(2)}`
+          : "Order cancelled"
+      );
+      setShowCancelModal(false);
+      setOrderToCancel(null);
+      refetch();
+    } catch (err: any) {
+      showToast.error(err?.data?.message || "Failed to cancel order");
+    }
+  };
 
   const productionQueueByOrderId = new Map<number, ProductionQueue>(
     productionQueues
@@ -245,6 +290,15 @@ const OrdersPage = () => {
                 className="text-indigo-600 hover:text-indigo-800 text-sm"
               >
                 Assign Designer
+              </button>
+            )}
+            {canCancel(orderRow.status) && (
+              <button
+                type="button"
+                onClick={() => openCancelModal(orderRow.orderId)}
+                className="text-orange-600 hover:text-orange-800 text-sm"
+              >
+                Cancel &amp; Refund
               </button>
             )}
             <button
@@ -510,6 +564,73 @@ const OrdersPage = () => {
               Cancel
             </Button>
             <Button onClick={handleAssignDesigner}>Assign Designer</Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Cancel & Refund Modal (A1: SOP_CANCELLATIONS.md) */}
+      <Modal
+        isOpen={showCancelModal}
+        onClose={() => {
+          setShowCancelModal(false);
+          setOrderToCancel(null);
+        }}
+        className="max-w-lg"
+      >
+        <div className="space-y-5">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900">
+              Cancel Order #{orderToCancel}
+            </h3>
+            <p className="text-sm text-gray-600 mt-1">
+              Per SOP_CANCELLATIONS.md, refund tier depends on production stage.
+              Leave the amount blank if nothing was paid or nothing should be
+              refunded; otherwise enter the base amount - tax is added back
+              automatically, proportional to that amount.
+            </p>
+          </div>
+
+          <div>
+            <p className="block text-sm font-medium text-gray-700 mb-2">
+              Base refund amount (optional)
+            </p>
+            <input
+              type="number"
+              min="0"
+              step="0.01"
+              value={cancelRefundAmount}
+              onChange={(e) => setCancelRefundAmount(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+              placeholder="0.00 (leave blank for no refund)"
+            />
+          </div>
+
+          <div>
+            <p className="block text-sm font-medium text-gray-700 mb-2">
+              Reason (recorded on the audit trail)
+            </p>
+            <textarea
+              value={cancelReason}
+              onChange={(e) => setCancelReason(e.target.value)}
+              rows={3}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+              placeholder="e.g. Customer requested cancellation before fabric sourcing"
+            />
+          </div>
+
+          <div className="flex justify-end gap-3">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowCancelModal(false);
+                setOrderToCancel(null);
+              }}
+            >
+              Back
+            </Button>
+            <Button onClick={handleCancelOrder} disabled={isCancelling}>
+              {isCancelling ? "Cancelling..." : "Cancel Order"}
+            </Button>
           </div>
         </div>
       </Modal>

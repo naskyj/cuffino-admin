@@ -167,6 +167,7 @@ export const baseSlice = createApi({
     "Transactions",
     "BankAccounts",
     "Notification",
+    "Tickets",
   ],
   baseQuery: baseQueryWithReauth,
   endpoints: () => ({}),

@@ -24,6 +24,7 @@ export function middleware(request: NextRequest) {
     "/production",
     "/products",
     "/returns",
+    "/support",
     "/users",
   ];
 

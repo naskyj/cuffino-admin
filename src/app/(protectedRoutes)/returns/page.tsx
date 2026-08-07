@@ -8,6 +8,7 @@ import {
   useGetAllReturnsQuery,
   useGetAllOrdersQuery,
   useUpdateReturnStatusMutation,
+  useRefundReturnMutation,
 } from "@/store/api";
 import { showToast } from "@/utilities/toast";
 
@@ -21,23 +22,25 @@ const ReturnsPage = () => {
   const [selectedReturn, setSelectedReturn] = useState<any>(null);
   const [showStatusModal, setShowStatusModal] = useState(false);
   const [newStatus, setNewStatus] = useState<ReturnStatus>("REQUESTED");
+  const [showRefundModal, setShowRefundModal] = useState(false);
+  const [refundAmount, setRefundAmount] = useState("");
+  const [refundReason, setRefundReason] = useState("");
 
   const { data: orders = [] } = useGetAllOrdersQuery();
   const { data: returns = [], isLoading, refetch } = useGetAllReturnsQuery();
   const [updateReturnStatus] = useUpdateReturnStatusMutation();
+  const [refundReturn, { isLoading: isRefunding }] = useRefundReturnMutation();
 
   const getOrderId = (returnRequest: any) =>
     returnRequest.orderId ?? returnRequest.order?.orderId ?? null;
 
   const getNormalizedStatus = (status: string): ReturnStatus => {
-    if (status === "REQUESTED") return "REQUESTED";
     return (status as ReturnStatus) || "REQUESTED";
   };
 
   const getStatusColor = (status: ReturnStatus) => {
     switch (status) {
       case "REQUESTED":
-      case "PENDING":
         return "bg-yellow-100 text-yellow-800";
       case "APPROVED":
         return "bg-blue-100 text-blue-800";
@@ -45,6 +48,10 @@ const ReturnsPage = () => {
         return "bg-red-100 text-red-800";
       case "RECEIVED":
         return "bg-purple-100 text-purple-800";
+      case "INSPECTED":
+        return "bg-indigo-100 text-indigo-800";
+      case "REWORK":
+        return "bg-orange-100 text-orange-800";
       case "REFUNDED":
         return "bg-green-100 text-green-800";
       default:
@@ -64,6 +71,37 @@ const ReturnsPage = () => {
       refetch();
     } catch {
       showToast.error("Failed to update return status");
+    }
+  };
+
+  // A1/G2: issues the refund directly against the order's payment (tax added proportionally by
+  // the backend) and moves the return to REFUNDED - replaces the old "go do it in Stripe, then
+  // remember to update this record" manual process.
+  const handleRefund = async () => {
+    if (!selectedReturn) return;
+    const amount = Number(refundAmount);
+    if (!amount || amount <= 0) {
+      showToast.error("Enter a valid refund amount");
+      return;
+    }
+    if (!refundReason.trim()) {
+      showToast.error("A reason is required for the audit record");
+      return;
+    }
+    try {
+      await refundReturn({
+        returnId: selectedReturn.returnId,
+        amount,
+        reason: refundReason.trim(),
+      }).unwrap();
+      showToast.success("Refund issued");
+      setShowRefundModal(false);
+      setSelectedReturn(null);
+      setRefundAmount("");
+      setRefundReason("");
+      refetch();
+    } catch (err: any) {
+      showToast.error(err?.data?.message || "Failed to issue refund");
     }
   };
 
@@ -128,7 +166,14 @@ const ReturnsPage = () => {
       key: "actions",
       header: "Actions",
       render: (_value: unknown, row: unknown) => {
-        const returnRow = row as { returnId: number; status: string };
+        const returnRow = row as {
+          returnId: number;
+          status: string;
+          refundAmount?: number;
+        };
+        const isRefunded =
+          getNormalizedStatus(returnRow.status) === "REFUNDED" ||
+          getNormalizedStatus(returnRow.status) === "REJECTED";
         return (
           <div className="flex gap-2">
             <button
@@ -142,6 +187,20 @@ const ReturnsPage = () => {
             >
               Update Status
             </button>
+            {!isRefunded && (
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedReturn(row);
+                  setRefundAmount("");
+                  setRefundReason("");
+                  setShowRefundModal(true);
+                }}
+                className="text-green-700 hover:text-green-900 text-sm"
+              >
+                Refund
+              </button>
+            )}
           </div>
         );
       },
@@ -167,7 +226,7 @@ const ReturnsPage = () => {
     {
       label: "Pending",
       value: returns
-        .filter((r: any) => ["PENDING", "REQUESTED"].includes(r.status))
+        .filter((r: any) => r.status === "REQUESTED")
         .length.toString(),
     },
     {
@@ -231,10 +290,11 @@ const ReturnsPage = () => {
             >
               <option value="">All Status</option>
               <option value="REQUESTED">Requested</option>
-              <option value="PENDING">Pending</option>
               <option value="APPROVED">Approved</option>
               <option value="REJECTED">Rejected</option>
               <option value="RECEIVED">Received</option>
+              <option value="INSPECTED">Inspected</option>
+              <option value="REWORK">Rework</option>
               <option value="REFUNDED">Refunded</option>
             </select>
             <select
@@ -299,10 +359,11 @@ const ReturnsPage = () => {
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
               >
                 <option value="REQUESTED">Requested</option>
-                <option value="PENDING">Pending</option>
                 <option value="APPROVED">Approved</option>
                 <option value="REJECTED">Rejected</option>
                 <option value="RECEIVED">Received</option>
+                <option value="INSPECTED">Inspected</option>
+                <option value="REWORK">Rework</option>
                 <option value="REFUNDED">Refunded</option>
               </select>
             </div>
@@ -317,6 +378,68 @@ const ReturnsPage = () => {
                 Cancel
               </Button>
               <Button onClick={handleUpdateStatus}>Update Status</Button>
+            </div>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Refund Modal (A1/G2) */}
+      <Modal
+        isOpen={showRefundModal}
+        onClose={() => {
+          setShowRefundModal(false);
+          setSelectedReturn(null);
+        }}
+        showCloseButton
+        className="max-w-md"
+      >
+        <div className="p-6">
+          <h2 className="text-xl font-bold text-gray-900 mb-1">Issue Refund</h2>
+          <p className="text-sm text-gray-500 mb-4">
+            Return #{selectedReturn?.returnId} &middot; Order #
+            {selectedReturn ? getOrderId(selectedReturn) : ""}. Tax is refunded
+            automatically, proportional to this base amount vs. the order total.
+          </p>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Base refund amount (before tax)
+              </label>
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                value={refundAmount}
+                onChange={(e) => setRefundAmount(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                placeholder="0.00"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Reason (recorded on the audit trail)
+              </label>
+              <textarea
+                value={refundReason}
+                onChange={(e) => setRefundReason(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                rows={3}
+                placeholder="e.g. Quality defect confirmed against pre-ship QC photos"
+              />
+            </div>
+            <div className="flex gap-3 justify-end">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowRefundModal(false);
+                  setSelectedReturn(null);
+                }}
+              >
+                Cancel
+              </Button>
+              <Button onClick={handleRefund} disabled={isRefunding}>
+                {isRefunding ? "Issuing..." : "Issue Refund"}
+              </Button>
             </div>
           </div>
         </div>
