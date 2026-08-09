@@ -18,12 +18,14 @@ import {
   useUpdateProductionStatusMutation,
 } from "@/store/api";
 import type { Designer } from "@/store/api/userApi";
+import { isAdminRole } from "@/utilities";
 import { showToast } from "@/utilities/toast";
 
 import DataTable from "../_components/DataTable";
 import PageHeader from "../_components/PageHeader";
 
 const ProductionPage = () => {
+  const canDelete = isAdminRole();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
@@ -359,13 +361,15 @@ const ProductionPage = () => {
             >
               Assign
             </button>
-            <button
-              type="button"
-              onClick={() => handleDeleteClick(queueRow.queueId)}
-              className="text-red-600 hover:text-red-800 text-sm"
-            >
-              Delete
-            </button>
+            {canDelete && (
+              <button
+                type="button"
+                onClick={() => handleDeleteClick(queueRow.queueId)}
+                className="text-red-600 hover:text-red-800 text-sm"
+              >
+                Delete
+              </button>
+            )}
           </div>
         );
       },

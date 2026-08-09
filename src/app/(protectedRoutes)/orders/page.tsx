@@ -16,12 +16,16 @@ import {
 import type { OrderResponseDTO } from "@/store/api/orderApi";
 import type { ProductionQueue } from "@/store/api/productionApi";
 import type { Designer } from "@/store/api/userApi";
+import { isAdminRole } from "@/utilities";
 import { showToast } from "@/utilities/toast";
 
 import DataTable from "../_components/DataTable";
 import PageHeader from "../_components/PageHeader";
 
 const OrdersPage = () => {
+  // Order cancel+refund and delete are ADMIN-only on the backend - MANAGER can view/manage
+  // everything else about an order (assign designer, status, etc.) but not these two.
+  const isAdmin = isAdminRole();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -292,7 +296,7 @@ const OrdersPage = () => {
                 Assign Designer
               </button>
             )}
-            {canCancel(orderRow.status) && (
+            {isAdmin && canCancel(orderRow.status) && (
               <button
                 type="button"
                 onClick={() => openCancelModal(orderRow.orderId)}
@@ -301,13 +305,15 @@ const OrdersPage = () => {
                 Cancel &amp; Refund
               </button>
             )}
-            <button
-              type="button"
-              onClick={() => handleDeleteClick(orderRow.orderId)}
-              className="text-red-600 hover:text-red-800 text-sm"
-            >
-              Delete
-            </button>
+            {isAdmin && (
+              <button
+                type="button"
+                onClick={() => handleDeleteClick(orderRow.orderId)}
+                className="text-red-600 hover:text-red-800 text-sm"
+              >
+                Delete
+              </button>
+            )}
           </div>
         );
       },

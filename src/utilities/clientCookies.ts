@@ -116,6 +116,14 @@ export const getUserRoleFromCookie = (): string | null => {
   return userDetails?.creator.roleName || null;
 };
 
+// Whether the current session is an ADMIN (vs. MANAGER or other staff roles).
+// Backend @PreAuthorize is the actual security boundary - this only controls
+// whether admin-only actions (hard deletes, staff creation, notification
+// settings, order cancel+refund) are shown in the UI. A MANAGER hitting the
+// underlying endpoint directly still gets a 403 from the server.
+export const isAdminRole = (): boolean =>
+  (getUserRoleFromCookie() || "").toUpperCase() === "ADMIN";
+
 // Purchaser email utilities
 export const getPurchaserEmailFromCookie = (): string | null =>
   getClientCookie(PURCHASE_COOKIE_NAMES.purchaserEmail as string) || null;

@@ -10,12 +10,17 @@ import {
   useUpdateReturnStatusMutation,
   useRefundReturnMutation,
 } from "@/store/api";
+import { isAdminRole } from "@/utilities";
 import { showToast } from "@/utilities/toast";
 
 import DataTable from "../_components/DataTable";
 import PageHeader from "../_components/PageHeader";
 
 const ReturnsPage = () => {
+  // PUT /returns/{id}/status is ADMIN-or-order-owner on the backend (not MANAGER) - hiding
+  // this for Manager avoids showing a control that would just 403. Refund IS available to
+  // MANAGER on the backend, so it stays visible to both roles.
+  const isAdmin = isAdminRole();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
@@ -176,17 +181,19 @@ const ReturnsPage = () => {
           getNormalizedStatus(returnRow.status) === "REJECTED";
         return (
           <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={() => {
-                setSelectedReturn(row);
-                setNewStatus(getNormalizedStatus(returnRow.status));
-                setShowStatusModal(true);
-              }}
-              className="text-blue-600 hover:text-blue-800 text-sm"
-            >
-              Update Status
-            </button>
+            {isAdmin && (
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedReturn(row);
+                  setNewStatus(getNormalizedStatus(returnRow.status));
+                  setShowStatusModal(true);
+                }}
+                className="text-blue-600 hover:text-blue-800 text-sm"
+              >
+                Update Status
+              </button>
+            )}
             {!isRefunded && (
               <button
                 type="button"

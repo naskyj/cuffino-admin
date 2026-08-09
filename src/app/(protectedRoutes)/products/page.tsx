@@ -17,12 +17,14 @@ import {
   useUpdateProductMutation,
   useUploadImageMutation,
 } from "@/store/api";
+import { isAdminRole } from "@/utilities";
 import { showToast } from "@/utilities/toast";
 
 import DataTable from "../_components/DataTable";
 import PageHeader from "../_components/PageHeader";
 
 const ProductsPage = () => {
+  const canDelete = isAdminRole();
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
@@ -363,13 +365,15 @@ const ProductsPage = () => {
           >
             Edit
           </button>
-          <button
-            type="button"
-            onClick={() => handleDeleteClick(row.productId)}
-            className="text-red-600 hover:text-red-800 text-sm"
-          >
-            Delete
-          </button>
+          {canDelete && (
+            <button
+              type="button"
+              onClick={() => handleDeleteClick(row.productId)}
+              className="text-red-600 hover:text-red-800 text-sm"
+            >
+              Delete
+            </button>
+          )}
         </div>
       ),
     },

@@ -13,12 +13,14 @@ import {
   useGetAllOrdersQuery,
   useUpdateLogisticsMutation,
 } from "@/store/api";
+import { isAdminRole } from "@/utilities";
 import { showToast } from "@/utilities/toast";
 
 import DataTable from "../_components/DataTable";
 import PageHeader from "../_components/PageHeader";
 
 const LogisticsPage = () => {
+  const canDelete = isAdminRole();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
@@ -326,13 +328,15 @@ const LogisticsPage = () => {
             >
               Edit
             </button>
-            <button
-              type="button"
-              onClick={() => handleDeleteClick(logisticsRow.logisticsId)}
-              className="text-red-600 hover:text-red-800 text-sm"
-            >
-              Delete
-            </button>
+            {canDelete && (
+              <button
+                type="button"
+                onClick={() => handleDeleteClick(logisticsRow.logisticsId)}
+                className="text-red-600 hover:text-red-800 text-sm"
+              >
+                Delete
+              </button>
+            )}
           </div>
         );
       },
