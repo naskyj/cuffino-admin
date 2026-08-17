@@ -53,7 +53,24 @@ const InventoryPage = () => {
     });
   };
 
+  const validateInventoryForm = () => {
+    if (Number(formData.quantity) < 0) {
+      showToast.error("Quantity cannot be negative");
+      return false;
+    }
+    if (formData.restockThreshold && Number(formData.restockThreshold) < 0) {
+      showToast.error("Restock threshold cannot be negative");
+      return false;
+    }
+    if (formData.vendorId && Number(formData.vendorId) <= 0) {
+      showToast.error("Vendor ID must be a valid positive number");
+      return false;
+    }
+    return true;
+  };
+
   const handleAdd = async () => {
+    if (!validateInventoryForm()) return;
     try {
       await createInventory({
         materialName: formData.materialName,
@@ -75,6 +92,7 @@ const InventoryPage = () => {
 
   const handleEdit = async () => {
     if (!selectedItem) return;
+    if (!validateInventoryForm()) return;
     try {
       await updateInventory({
         id: selectedItem.inventoryId,
@@ -354,6 +372,7 @@ const InventoryPage = () => {
                 <input
                   aria-label="Add inventory quantity"
                   type="number"
+                  min="0"
                   value={formData.quantity}
                   onChange={(e) =>
                     setFormData({ ...formData, quantity: e.target.value })
@@ -386,6 +405,7 @@ const InventoryPage = () => {
                 <input
                   aria-label="Add restock threshold"
                   type="number"
+                  min="0"
                   value={formData.restockThreshold}
                   onChange={(e) =>
                     setFormData({
@@ -403,6 +423,7 @@ const InventoryPage = () => {
                 <input
                   aria-label="Add vendor id"
                   type="number"
+                  min="1"
                   value={formData.vendorId}
                   onChange={(e) =>
                     setFormData({ ...formData, vendorId: e.target.value })
@@ -466,6 +487,7 @@ const InventoryPage = () => {
                 <input
                   aria-label="Edit inventory quantity"
                   type="number"
+                  min="0"
                   value={formData.quantity}
                   onChange={(e) =>
                     setFormData({ ...formData, quantity: e.target.value })
@@ -498,6 +520,7 @@ const InventoryPage = () => {
                 <input
                   aria-label="Edit restock threshold"
                   type="number"
+                  min="0"
                   value={formData.restockThreshold}
                   onChange={(e) =>
                     setFormData({
@@ -515,6 +538,7 @@ const InventoryPage = () => {
                 <input
                   aria-label="Edit vendor id"
                   type="number"
+                  min="1"
                   value={formData.vendorId}
                   onChange={(e) =>
                     setFormData({ ...formData, vendorId: e.target.value })

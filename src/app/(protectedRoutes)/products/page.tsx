@@ -117,6 +117,14 @@ const ProductsPage = () => {
         showToast.error("Please select at least one default fabric");
         return;
       }
+      if (Number(formData.price) < 0) {
+        showToast.error("Price cannot be negative");
+        return;
+      }
+      if (formData.stockQuantity && Number(formData.stockQuantity) < 0) {
+        showToast.error("Stock quantity cannot be negative");
+        return;
+      }
 
       const productData: any = {
         name: formData.name,
@@ -154,6 +162,14 @@ const ProductsPage = () => {
     try {
       if (formData.defaultFabricInventoryIds.length === 0) {
         showToast.error("Please select at least one default fabric");
+        return;
+      }
+      if (Number(formData.price) < 0) {
+        showToast.error("Price cannot be negative");
+        return;
+      }
+      if (formData.stockQuantity && Number(formData.stockQuantity) < 0) {
+        showToast.error("Stock quantity cannot be negative");
         return;
       }
 
@@ -550,6 +566,7 @@ const ProductsPage = () => {
                 <input
                   type="number"
                   step="0.01"
+                  min="0"
                   value={formData.price}
                   onChange={(e) =>
                     setFormData({ ...formData, price: e.target.value })
@@ -564,6 +581,7 @@ const ProductsPage = () => {
                 </label>
                 <input
                   type="number"
+                  min="0"
                   value={formData.stockQuantity}
                   onChange={(e) =>
                     setFormData({ ...formData, stockQuantity: e.target.value })
@@ -814,6 +832,7 @@ const ProductsPage = () => {
                 <input
                   type="number"
                   step="0.01"
+                  min="0"
                   value={formData.price}
                   onChange={(e) =>
                     setFormData({ ...formData, price: e.target.value })
@@ -828,6 +847,7 @@ const ProductsPage = () => {
                 </label>
                 <input
                   type="number"
+                  min="0"
                   value={formData.stockQuantity}
                   onChange={(e) =>
                     setFormData({ ...formData, stockQuantity: e.target.value })

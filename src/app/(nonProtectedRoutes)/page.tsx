@@ -7,7 +7,7 @@ import { Controller, FormProvider, useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
 import * as yup from "yup";
 
-import { Button, Input } from "@/components/ui";
+import { Button, Input, PasswordInput } from "@/components/ui";
 import { useLoginMutation } from "@/store/api";
 import { loginSuccess } from "@/store/slices/authSlice";
 import {
@@ -147,12 +147,12 @@ const SignInPage = () => {
               name="password"
               control={control}
               render={({ field, fieldState }) => (
-                <Input
+                <PasswordInput
                   value={field.value}
                   onChange={field.onChange}
+                  ref={field.ref}
                   label="Password"
                   placeholder="Enter Password"
-                  type="password"
                   error={fieldState.error?.message}
                 />
               )}

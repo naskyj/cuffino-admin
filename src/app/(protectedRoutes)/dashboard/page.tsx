@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import React from "react";
 import {
   Bar,
@@ -24,7 +25,70 @@ import {
 } from "@/store/api";
 
 import { StatCard } from "../_components";
+import { OrdersIcon, PaymentsIcon, ProductsIcon, User } from "../_components/assets";
 import PageHeader from "../_components/PageHeader";
+
+const QUICK_ACTIONS = [
+  {
+    href: "/products",
+    title: "Add Product",
+    description: "Create new product listing",
+    icon: ProductsIcon,
+    color: "blue",
+  },
+  {
+    href: "/orders",
+    title: "View Orders",
+    description: "Check recent orders",
+    icon: OrdersIcon,
+    color: "green",
+  },
+  {
+    href: "/users",
+    title: "Manage Users",
+    description: "User administration",
+    icon: User,
+    color: "purple",
+  },
+  {
+    href: "/payments",
+    title: "View Payments",
+    description: "Payment records",
+    icon: PaymentsIcon,
+    color: "amber",
+  },
+] as const;
+
+const QUICK_ACTION_COLORS: Record<string, { bg: string; hoverBg: string; iconBg: string; iconText: string; border: string }> = {
+  blue: {
+    bg: "bg-blue-50",
+    hoverBg: "hover:bg-blue-100",
+    iconBg: "bg-blue-600",
+    iconText: "text-blue-900",
+    border: "border-blue-200",
+  },
+  green: {
+    bg: "bg-green-50",
+    hoverBg: "hover:bg-green-100",
+    iconBg: "bg-green-600",
+    iconText: "text-green-900",
+    border: "border-green-200",
+  },
+  purple: {
+    bg: "bg-purple-50",
+    hoverBg: "hover:bg-purple-100",
+    iconBg: "bg-purple-600",
+    iconText: "text-purple-900",
+    border: "border-purple-200",
+  },
+  amber: {
+    bg: "bg-amber-50",
+    hoverBg: "hover:bg-amber-100",
+    iconBg: "bg-amber-600",
+    iconText: "text-amber-900",
+    border: "border-amber-200",
+  },
+};
 
 type DashboardOrder = {
   orderId?: number;
@@ -301,50 +365,29 @@ const DashboardPage = () => {
                 Quick Actions
               </h3>
               <div className="grid grid-cols-2 gap-4">
-                <a
-                  href="/products"
-                  className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left"
-                >
-                  <div className="text-sm font-medium text-gray-900">
-                    Add Product
-                  </div>
-                  <div className="text-xs text-gray-500 mt-1">
-                    Create new product listing
-                  </div>
-                </a>
-                <a
-                  href="/orders"
-                  className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left"
-                >
-                  <div className="text-sm font-medium text-gray-900">
-                    View Orders
-                  </div>
-                  <div className="text-xs text-gray-500 mt-1">
-                    Check recent orders
-                  </div>
-                </a>
-                <a
-                  href="/users"
-                  className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left"
-                >
-                  <div className="text-sm font-medium text-gray-900">
-                    Manage Users
-                  </div>
-                  <div className="text-xs text-gray-500 mt-1">
-                    User administration
-                  </div>
-                </a>
-                <a
-                  href="/payments"
-                  className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left"
-                >
-                  <div className="text-sm font-medium text-gray-900">
-                    View Payments
-                  </div>
-                  <div className="text-xs text-gray-500 mt-1">
-                    Payment records
-                  </div>
-                </a>
+                {QUICK_ACTIONS.map((action) => {
+                  const colors = QUICK_ACTION_COLORS[action.color];
+                  const Icon = action.icon;
+                  return (
+                    <Link
+                      key={action.href}
+                      href={action.href}
+                      className={`group p-4 border rounded-lg transition-all text-left ${colors.bg} ${colors.hoverBg} ${colors.border} hover:shadow-md hover:-translate-y-0.5`}
+                    >
+                      <div
+                        className={`w-9 h-9 rounded-lg ${colors.iconBg} flex items-center justify-center mb-3 shadow-sm`}
+                      >
+                        <Icon className="w-5 h-5 text-white" />
+                      </div>
+                      <div className={`text-sm font-semibold ${colors.iconText}`}>
+                        {action.title}
+                      </div>
+                      <div className="text-xs text-gray-600 mt-1">
+                        {action.description}
+                      </div>
+                    </Link>
+                  );
+                })}
               </div>
             </div>
           </div>
