@@ -16,6 +16,7 @@ export interface SideBarProps {
     name: string;
     avatar?: string;
     email?: string;
+    role?: string;
   };
   onLogout?: () => void;
 }

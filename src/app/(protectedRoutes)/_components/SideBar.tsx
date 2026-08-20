@@ -104,9 +104,16 @@ const SideBar: React.FC<SideBarProps> = ({
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-900 truncate">
-                {userProfile.name}
-              </p>
+              <div className="flex items-center gap-1.5">
+                <p className="text-sm font-medium text-gray-900 truncate">
+                  {userProfile.name}
+                </p>
+                {userProfile.role && (
+                  <span className="flex-shrink-0 rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-primary">
+                    {userProfile.role}
+                  </span>
+                )}
+              </div>
               {userProfile.email && (
                 <p className="text-xs text-gray-500 truncate">
                   {userProfile.email}

@@ -6,7 +6,11 @@ import { useDispatch } from "react-redux";
 
 import { Modal } from "@/components/ui";
 import { logout } from "@/store/slices/authSlice";
-import { clearAllAuthCookies, getUserDetailsFromCookie } from "@/utilities";
+import {
+  clearAllAuthCookies,
+  getUserDetailsFromCookie,
+  getUserRoleFromCookie,
+} from "@/utilities";
 
 import {
   DashboardIcon,
@@ -27,6 +31,7 @@ const View = ({ children }: { children: React.ReactNode }) => {
     name: string;
     email?: string;
     avatar?: string;
+    role?: string;
   } | null>(null);
   const router = useRouter();
   const dispatch = useDispatch();
@@ -39,6 +44,7 @@ const View = ({ children }: { children: React.ReactNode }) => {
           userDetails.creator.first_name || userDetails.creator.email || "User",
         email: userDetails.creator.email,
         avatar: userDetails.creator.profile_picture,
+        role: getUserRoleFromCookie() || undefined,
       });
     }
   }, []);
