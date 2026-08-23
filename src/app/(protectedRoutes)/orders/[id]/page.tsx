@@ -2,11 +2,14 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { useState } from "react";
 
 import {
   useGetAllProductionQueuesQuery,
   useGetOrderByIdQuery,
+  useTailorReviewMeasurementMutation,
 } from "@/store/api";
+import { showToast } from "@/utilities/toast";
 
 const toLabel = (key: string) =>
   key
@@ -113,8 +116,27 @@ export default function OrderDetailsPage() {
     isError,
   } = useGetOrderByIdQuery(orderId, { skip: Number.isNaN(orderId) });
   const { data: productionQueues = [] } = useGetAllProductionQueuesQuery();
+  const [tailorReviewMeasurement, { isLoading: isReviewingMeasurement }] =
+    useTailorReviewMeasurementMutation();
+  const [reviewNotesByItem, setReviewNotesByItem] = useState<Record<number, string>>({});
 
   const productionQueue = productionQueues.find((queue) => queue.orderId === orderId);
+
+  const handleTailorReview = async (itemId: number, status: "APPROVED" | "FLAGGED") => {
+    try {
+      await tailorReviewMeasurement({
+        orderId,
+        itemId,
+        status,
+        notes: reviewNotesByItem[itemId] || undefined,
+      }).unwrap();
+      showToast.success(
+        status === "APPROVED" ? "Measurement approved" : "Measurement flagged for review"
+      );
+    } catch (error: any) {
+      showToast.error(error?.data?.message || "Failed to update measurement review status");
+    }
+  };
 
   if (Number.isNaN(orderId)) {
     return (
@@ -165,7 +187,7 @@ export default function OrderDetailsPage() {
         return false;
       }
 
-      if (key === "customFields" && typeof value === "object") {
+      if ((key === "customFields" || key === "garmentMeasurements") && typeof value === "object") {
         return Object.keys(value as Record<string, unknown>).length > 0;
       }
 
@@ -304,12 +326,87 @@ export default function OrderDetailsPage() {
                       );
                     }
 
+                    if (key === "garmentMeasurements" && typeof value === "object" && value !== null) {
+                      return (
+                        <div key={`${item.orderItemId}-${key}`} className="md:col-span-2">
+                          <p className="text-xs uppercase tracking-wide text-gray-500 mb-1">
+                            Garment measurements (body + fit ease)
+                          </p>
+                          <div className="flex flex-wrap gap-2">
+                            {Object.entries(value as Record<string, unknown>).map(([fieldKey, fieldValue]) => (
+                              <span
+                                key={`${item.orderItemId}-garment-${fieldKey}`}
+                                className="inline-flex items-center rounded-full bg-teal-50 px-2.5 py-1 text-xs text-teal-700"
+                              >
+                                {toLabel(fieldKey)}: {String(fieldValue)}&quot;
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    }
+
+                    if (key === "tailorReviewStatus") {
+                      const statusColors: Record<string, string> =
+                        value === "APPROVED"
+                          ? { bg: "bg-green-100", text: "text-green-700" }
+                          : value === "FLAGGED"
+                            ? { bg: "bg-red-100", text: "text-red-700" }
+                            : { bg: "bg-amber-100", text: "text-amber-700" };
+                      return (
+                        <div key={`${item.orderItemId}-${key}`}>
+                          <span className="text-gray-500">Tailor review:</span>{" "}
+                          <span
+                            className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${statusColors.bg} ${statusColors.text}`}
+                          >
+                            {String(value)}
+                          </span>
+                        </div>
+                      );
+                    }
+
                     return (
                       <div key={`${item.orderItemId}-${key}`}>
                         <span className="text-gray-500">{toLabel(key)}:</span> {String(value)}
                       </div>
                     );
                   })}
+                </div>
+
+                <div className="pt-2 border-t border-gray-100 space-y-2">
+                  <p className="text-xs uppercase tracking-wide text-gray-500">
+                    Tailor review - before cutting
+                  </p>
+                  <textarea
+                    value={reviewNotesByItem[item.orderItemId] || ""}
+                    onChange={(event) =>
+                      setReviewNotesByItem((current) => ({
+                        ...current,
+                        [item.orderItemId]: event.target.value,
+                      }))
+                    }
+                    placeholder="Optional notes (e.g. what looks off, what to double-check)"
+                    rows={2}
+                    className="w-full rounded-md border border-gray-200 px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-primary"
+                  />
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      disabled={isReviewingMeasurement}
+                      onClick={() => handleTailorReview(item.orderItemId, "APPROVED")}
+                      className="px-3 py-1.5 rounded-md text-xs font-medium bg-green-600 text-white hover:bg-green-700 disabled:opacity-50"
+                    >
+                      Approve
+                    </button>
+                    <button
+                      type="button"
+                      disabled={isReviewingMeasurement}
+                      onClick={() => handleTailorReview(item.orderItemId, "FLAGGED")}
+                      className="px-3 py-1.5 rounded-md text-xs font-medium bg-red-600 text-white hover:bg-red-700 disabled:opacity-50"
+                    >
+                      Flag
+                    </button>
+                  </div>
                 </div>
               </div>
             )}

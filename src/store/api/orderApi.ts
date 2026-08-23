@@ -272,6 +272,22 @@ export const orderApi = baseSlice.injectEndpoints({
       }),
       invalidatesTags: (result, error, { id }) => [{ type: "Orders", id }, "Orders"],
     }),
+
+    // Tailor/staff reviews an order item's measurement before cutting (APPROVED/FLAGGED),
+    // written to the measurement audit trail server-side.
+    // Backend returns the raw Order entity here, not OrderResponseDTO - typed loosely and
+    // refetched via the invalidated tag instead of relying on this response's exact shape.
+    tailorReviewMeasurement: builder.mutation<
+      any,
+      { orderId: number; itemId: number; status: "APPROVED" | "FLAGGED"; notes?: string }
+    >({
+      query: ({ orderId, itemId, status, notes }) => ({
+        url: `/order/${orderId}/items/${itemId}/measurement/tailor-review`,
+        method: "PUT",
+        body: { status, notes },
+      }),
+      invalidatesTags: (result, error, { orderId }) => [{ type: "Orders", id: orderId }, "Orders"],
+    }),
   }),
 });
 
@@ -290,4 +306,5 @@ export const {
   useUpdateOrderItemMutation,
   useUpdateShippingAddressMutation,
   useCancelOrderWithRefundMutation,
+  useTailorReviewMeasurementMutation,
 } = orderApi;
