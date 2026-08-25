@@ -1,15 +1,17 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 
 import { Modal } from "@/components/ui";
 import { logout } from "@/store/slices/authSlice";
 import {
+  broadcastLogout,
   clearAllAuthCookies,
   getUserDetailsFromCookie,
   getUserRoleFromCookie,
+  isAuthenticated,
+  onLogoutBroadcast,
 } from "@/utilities";
 
 import {
@@ -21,7 +23,7 @@ import {
   User,
 } from "./assets";
 import DasboardHeader from "./DasboardHeader";
-// import MobileSideBar from "./MobileSideBar";
+import MobileSideBar from "./MobileSideBar";
 import SideBar from "./SideBar";
 
 const View = ({ children }: { children: React.ReactNode }) => {
@@ -33,7 +35,6 @@ const View = ({ children }: { children: React.ReactNode }) => {
     avatar?: string;
     role?: string;
   } | null>(null);
-  const router = useRouter();
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -47,6 +48,32 @@ const View = ({ children }: { children: React.ReactNode }) => {
         role: getUserRoleFromCookie() || undefined,
       });
     }
+  }, []);
+
+  useEffect(() => {
+    // Browsers restore a page from bfcache (back/forward cache) on history navigation without
+    // re-running any JS or hitting the server - meaning the middleware's auth check never runs,
+    // so hitting "back" after logout could show a fully-interactive snapshot of a protected page.
+    // event.persisted is true specifically when the page came from bfcache rather than a fresh load.
+    const handlePageShow = (event: PageTransitionEvent) => {
+      if (event.persisted && !isAuthenticated()) {
+        window.location.replace("/");
+      }
+    };
+    window.addEventListener("pageshow", handlePageShow);
+
+    // Logging out in one tab only clears cookies + that tab's own in-memory Redux state - every
+    // other open tab keeps running on its stale state until it happens to make a new request.
+    // BroadcastChannel lets the logging-out tab tell every other same-origin tab to follow suit
+    // immediately rather than staying usable until a manual refresh.
+    const unsubscribe = onLogoutBroadcast(() => {
+      window.location.replace("/");
+    });
+
+    return () => {
+      window.removeEventListener("pageshow", handlePageShow);
+      unsubscribe();
+    };
   }, []);
 
   const sidebarItems = [
@@ -119,8 +146,12 @@ const View = ({ children }: { children: React.ReactNode }) => {
   const confirmLogout = () => {
     clearAllAuthCookies();
     dispatch(logout());
+    broadcastLogout();
     setShowLogoutModal(false);
-    router.push("/");
+    // A hard navigation, not router.push: this guarantees a real request that the middleware
+    // sees (so the token cookie is confirmed gone before anything protected could render again),
+    // rather than an in-app client-side transition.
+    window.location.href = "/";
   };
 
   const cancelLogout = () => {
@@ -131,22 +162,22 @@ const View = ({ children }: { children: React.ReactNode }) => {
     setIsMobileSidebarOpen(!isMobileSidebarOpen);
   };
 
-  // const closeMobileSidebar = () => {
-  //   setIsMobileSidebarOpen(false);
-  // };
+  const closeMobileSidebar = () => {
+    setIsMobileSidebarOpen(false);
+  };
 
   return (
     <div className="h-screen">
       <DasboardHeader onMenuClick={toggleMobileSidebar} />
 
       {/* Mobile Sidebar */}
-      {/* <MobileSideBar
+      <MobileSideBar
         items={sidebarItems}
         onLogout={handleLogout}
-        userProfile={userProfile}
+        userProfile={userProfile || undefined}
         isOpen={isMobileSidebarOpen}
         onClose={closeMobileSidebar}
-      /> */}
+      />
 
       <div className="flex h-[calc(100vh - 60px)] ">
         {/* Desktop Sidebar */}
