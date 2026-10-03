@@ -39,6 +39,16 @@ export const imageApi = baseSlice.injectEndpoints({
       invalidatesTags: ["Images", "Upload"],
     }),
 
+    // A customer's own uploads, viewed by staff - e.g. the MEASUREMENT_REFERENCE front/side/back
+    // photos a reviewer checks against the measurements the customer typed in.
+    getUserImages: builder.query<ImageUploadResponse[], { userId: number; imageType?: string }>({
+      query: ({ userId, imageType }) => ({
+        url: `/api/images/user/${userId}`,
+        params: imageType ? { imageType } : undefined,
+      }),
+      providesTags: ["Images"],
+    }),
+
     // Delete Image by ID
     deleteImage: builder.mutation<ImageAPIResponse, number>({
       query: (imageId) => ({
@@ -61,6 +71,7 @@ export const imageApi = baseSlice.injectEndpoints({
 });
 
 export const {
+  useGetUserImagesQuery,
   useUploadImageMutation,
   useDeleteImageMutation,
   useDeleteImageByUrlMutation,

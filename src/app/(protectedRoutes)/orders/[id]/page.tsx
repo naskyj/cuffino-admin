@@ -7,6 +7,7 @@ import { useState } from "react";
 import {
   useGetAllProductionQueuesQuery,
   useGetOrderByIdQuery,
+  useGetUserImagesQuery,
   useTailorReviewMeasurementMutation,
 } from "@/store/api";
 import { showToast } from "@/utilities/toast";
@@ -116,6 +117,12 @@ export default function OrderDetailsPage() {
     isError,
   } = useGetOrderByIdQuery(orderId, { skip: Number.isNaN(orderId) });
   const { data: productionQueues = [] } = useGetAllProductionQueuesQuery();
+  // Front/side/back photos the customer attached to their manually entered measurements, so the
+  // reviewer can eyeball the numbers below against the actual body before approving.
+  const { data: referencePhotos = [] } = useGetUserImagesQuery(
+    { userId: order?.customerId as number, imageType: "MEASUREMENT_REFERENCE" },
+    { skip: !order?.customerId }
+  );
   const [tailorReviewMeasurement, { isLoading: isReviewingMeasurement }] =
     useTailorReviewMeasurementMutation();
   const [reviewNotesByItem, setReviewNotesByItem] = useState<Record<number, string>>({});
@@ -270,6 +277,19 @@ export default function OrderDetailsPage() {
           </div>
         </div>
       )}
+
+      <div className="bg-white rounded-lg border border-gray-200 p-6">
+        {referencePhotos.length > 0 ? (
+          renderImageStrip("Measurement Reference Photos", referencePhotos)
+        ) : (
+          <>
+            <h4 className="text-sm font-semibold text-gray-700">Measurement Reference Photos</h4>
+            <p className="text-sm text-gray-500 mt-1">
+              The customer hasn&apos;t added front/side/back photos.
+            </p>
+          </>
+        )}
+      </div>
 
       <div className="space-y-4">
         <h2 className="text-lg font-semibold text-gray-900">Items ({order.items?.length || 0})</h2>

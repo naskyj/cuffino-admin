@@ -2,7 +2,7 @@
 
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useRouter } from "next/navigation";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Controller, FormProvider, useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
 import * as yup from "yup";
@@ -28,6 +28,25 @@ const loginSchema = yup.object().shape({
 
 type LoginformData = yup.InferType<typeof loginSchema>;
 
+/** Roles permitted to use the admin console at all. */
+const ADMIN_CONSOLE_ROLES = ["ADMIN", "MANAGER"];
+
+/**
+ * Where a given role starts after signing in. Both currently land on /dashboard, which itself
+ * switches between AdminDashboard and ManagerDashboard on role - kept as a function so giving a
+ * role a genuinely separate route later is a one-line change here rather than a hunt through
+ * call sites.
+ */
+const landingRouteForRole = (roleName: string): string => {
+  switch (roleName) {
+    case "MANAGER":
+      return "/dashboard";
+    case "ADMIN":
+    default:
+      return "/dashboard";
+  }
+};
+
 const SignInPage = () => {
   const router = useRouter();
   const dispatch = useDispatch();
@@ -40,6 +59,19 @@ const SignInPage = () => {
 
   const { handleSubmit, control } = form;
 
+  // The middleware bounces a signed-in non-staff account back here with ?error=forbidden. Read
+  // from window.location rather than useSearchParams: the latter forces this page into a Suspense
+  // boundary at build time, and there is nothing to suspend on for a single query flag.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("error") === "forbidden") {
+      setErrorMessage(
+        "That account doesn't have access to the admin console. Please sign in with an admin or manager account."
+      );
+    }
+  }, []);
+
   const handleFormSubmit = async (formData: LoginformData) => {
     try {
       setErrorMessage("");
@@ -47,6 +79,20 @@ const SignInPage = () => {
         username: formData.username,
         password: formData.password,
       }).unwrap();
+
+      // Only ADMIN and MANAGER belong in the admin console. Before this check, ANY valid
+      // account - including a plain CUSTOMER - could sign in here and land on /dashboard; the
+      // page would render and then every API call behind it would 403 one by one, which reads as
+      // a broken app rather than "you're in the wrong place". Note the backend is still the real
+      // boundary (@PreAuthorize on every endpoint); this is about not letting the wrong person
+      // through the front door in the first place.
+      const roleName = (response.user?.role?.roleName || "").toUpperCase();
+      if (!ADMIN_CONSOLE_ROLES.includes(roleName)) {
+        setErrorMessage(
+          "This account doesn't have access to the admin console. Please sign in with an admin or manager account."
+        );
+        return;
+      }
 
       if (response.token && response.user) {
         // Store token in cookie
@@ -93,8 +139,10 @@ const SignInPage = () => {
           })
         );
 
-        // Redirect to dashboard
-        router.push("/dashboard");
+        // Each role lands on its own view: /dashboard renders AdminDashboard or ManagerDashboard
+        // depending on the signed-in role, so an admin gets the revenue view and a manager gets
+        // the operations one rather than a view built for somebody else's job.
+        router.push(landingRouteForRole(roleName));
       }
     } catch (err) {
       const error = err as {

@@ -64,6 +64,12 @@ export interface ChangePasswordRequest {
   email: string;
   oldPassword: string;
   newPassword: string;
+  /**
+   * The backend's ChangePasswordDTO requires an emailed OTP in addition to the old password -
+   * omitting it makes the call fail with "Invalid or missing OTP". Obtain it via
+   * sendPasswordOtp first.
+   */
+  otp: string;
 }
 
 export interface ChangePasswordResponse {
@@ -163,6 +169,32 @@ export const authApi = baseSlice.injectEndpoints({
       }),
     }),
 
+    // Step 1 of both "change my password" (profile page) and "I forgot my password":
+    // emails a 6-digit code that expires in 15 minutes.
+    sendPasswordOtp: builder.mutation<
+      { message: string; status: number },
+      { email: string }
+    >({
+      query: (data) => ({
+        url: "/user/send-password-otp",
+        method: "POST",
+        body: data,
+      }),
+    }),
+
+    // Step 2 of the FORGOT-password flow specifically. Distinct from changePassword above, which
+    // additionally requires the current password - impossible to supply if you've forgotten it.
+    resetPassword: builder.mutation<
+      { message: string; status: number },
+      { email: string; otp: string; newPassword: string }
+    >({
+      query: (data) => ({
+        url: "/user/reset-password",
+        method: "POST",
+        body: data,
+      }),
+    }),
+
     // Get OTP (Development/Testing only)
     getOTP: builder.mutation<
       {
@@ -190,5 +222,7 @@ export const {
   useVerifyEmailMutation,
   useResendVerificationMutation,
   useChangePasswordMutation,
+  useSendPasswordOtpMutation,
+  useResetPasswordMutation,
   useGetOTPMutation,
 } = authApi;

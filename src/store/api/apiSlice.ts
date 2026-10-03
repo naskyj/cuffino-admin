@@ -137,7 +137,9 @@ const baseQueryWithReauth: BaseQueryFn<
 
       clearAllAuthCookies();
       api.dispatch(logout());
-      window.location.href = "/sign-in";
+      // The sign-in page in this app is the root route - "/sign-in" has never existed here,
+      // so a session expiring used to dump the user on a 404 instead of the login form.
+      window.location.href = "/";
     }
   }
 
