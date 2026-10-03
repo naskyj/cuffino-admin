@@ -8,7 +8,24 @@ import {
   useGetOrdersByCustomerQuery,
   useGetUserAddressesQuery,
   useGetUserByIdQuery,
+  useGetUserImagesQuery,
 } from "@/store/api";
+
+// Every measurement the profile can carry, in display order. The modal used to hard-code six of
+// these, so neck/sleeve/inseam/thigh/calf were silently missing for anyone reviewing a customer.
+const MEASUREMENT_FIELDS: [string, string][] = [
+  ["bust", "Bust"],
+  ["waist", "Waist"],
+  ["hips", "Hips"],
+  ["shoulderWidth", "Shoulder"],
+  ["neck", "Neck"],
+  ["sleeveLength", "Sleeve Length"],
+  ["armLength", "Arm Length"],
+  ["legLength", "Leg Length"],
+  ["inseam", "Inseam"],
+  ["thigh", "Thigh"],
+  ["calf", "Calf"],
+];
 
 interface UserDetailModalProps {
   isOpen: boolean;
@@ -30,6 +47,12 @@ export default function UserDetailModal({
     useGetMeasurementProfilesQuery(userId!, { skip: !userId });
   const { data: orders = [], isLoading: ordersLoading } =
     useGetOrdersByCustomerQuery(userId!, { skip: !userId });
+  // Front/side/back photos the customer attached to their measurements, for eyeballing the
+  // numbers below against the actual body.
+  const { data: referencePhotos = [] } = useGetUserImagesQuery(
+    { userId: userId!, imageType: "MEASUREMENT_REFERENCE" },
+    { skip: !userId }
+  );
 
   const isLoading =
     userLoading || addressesLoading || measurementsLoading || ordersLoading;
@@ -70,12 +93,12 @@ export default function UserDetailModal({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      className="max-w-5xl max-h-[90vh] overflow-y-auto"
+      className="max-w-6xl w-[95vw] mx-2"
     >
-      <div className="p-8 bg-gradient-to-br from-gray-50 to-white">
+      <div className="bg-gradient-to-br from-gray-50 to-white">
         {/* Header */}
         <div className="mb-6 pb-4 border-b-2 border-primary/20">
-          <h2 className="text-3xl font-bold text-primary">User Details</h2>
+          <h2 className="text-2xl sm:text-3xl font-bold text-primary">User Details</h2>
           <p className="text-sm text-gray-500 mt-1">
             Complete user information and activity
           </p>
@@ -91,7 +114,7 @@ export default function UserDetailModal({
         ) : (
           <div className="space-y-6">
             {/* Basic Information */}
-            <div className="bg-primary/5 rounded-xl p-6 border-2 border-primary/20 shadow-sm">
+            <div className="bg-primary/5 rounded-xl p-4 sm:p-6 border-2 border-primary/20 shadow-sm">
               <div className="flex items-center gap-3 mb-5">
                 <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
                   <svg
@@ -112,24 +135,24 @@ export default function UserDetailModal({
                   Basic Information
                 </h3>
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-white rounded-lg p-4 border border-primary/20">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="bg-white rounded-lg p-4 border border-primary/20 min-w-0">
                   <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
                     Username
                   </div>
-                  <p className="text-base font-semibold text-gray-900 mt-1">
+                  <p className="text-base font-semibold text-gray-900 mt-1 break-words [overflow-wrap:anywhere]">
                     {user?.username || "N/A"}
                   </p>
                 </div>
-                <div className="bg-white rounded-lg p-4 border border-primary/20">
+                <div className="bg-white rounded-lg p-4 border border-primary/20 min-w-0">
                   <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
                     Email
                   </div>
-                  <p className="text-base font-semibold text-gray-900 mt-1">
+                  <p className="text-base font-semibold text-gray-900 mt-1 break-words [overflow-wrap:anywhere]">
                     {user?.email || "N/A"}
                   </p>
                 </div>
-                <div className="bg-white rounded-lg p-4 border border-primary/20">
+                <div className="bg-white rounded-lg p-4 border border-primary/20 min-w-0">
                   <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
                     Role
                   </div>
@@ -145,7 +168,7 @@ export default function UserDetailModal({
                     </span>
                   </p>
                 </div>
-                <div className="bg-white rounded-lg p-4 border border-primary/20">
+                <div className="bg-white rounded-lg p-4 border border-primary/20 min-w-0">
                   <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
                     Status
                   </div>
@@ -162,21 +185,21 @@ export default function UserDetailModal({
                   </p>
                 </div>
                 {user?.phoneNumber && (
-                  <div className="bg-white rounded-lg p-4 border border-primary/20">
+                  <div className="bg-white rounded-lg p-4 border border-primary/20 min-w-0">
                     <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
                       Phone
                     </div>
-                    <p className="text-base font-semibold text-gray-900 mt-1">
+                    <p className="text-base font-semibold text-gray-900 mt-1 break-words [overflow-wrap:anywhere]">
                       {user.phoneNumber}
                     </p>
                   </div>
                 )}
                 {user?.companyName && (
-                  <div className="bg-white rounded-lg p-4 border border-primary/20">
+                  <div className="bg-white rounded-lg p-4 border border-primary/20 min-w-0">
                     <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
                       Company
                     </div>
-                    <p className="text-base font-semibold text-gray-900 mt-1">
+                    <p className="text-base font-semibold text-gray-900 mt-1 break-words [overflow-wrap:anywhere]">
                       {user.companyName}
                     </p>
                   </div>
@@ -185,7 +208,7 @@ export default function UserDetailModal({
             </div>
 
             {/* Addresses */}
-            <div className="bg-primary/5 rounded-xl p-6 border-2 border-primary/20 shadow-sm">
+            <div className="bg-primary/5 rounded-xl p-4 sm:p-6 border-2 border-primary/20 shadow-sm">
               <div className="flex items-center gap-3 mb-5">
                 <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
                   <svg
@@ -227,7 +250,7 @@ export default function UserDetailModal({
                       className="bg-white rounded-lg p-5 border-2 border-primary/20 hover:border-primary/40 transition-colors shadow-sm"
                     >
                       <div className="flex justify-between items-start">
-                        <div className="flex-1">
+                        <div className="flex-1 min-w-0 break-words">
                           <div className="flex items-center gap-2 mb-3">
                             <span className="font-bold text-gray-900 text-lg">
                               {address.label || "Address"}
@@ -261,7 +284,7 @@ export default function UserDetailModal({
             </div>
 
             {/* Measurement Profiles */}
-            <div className="bg-primary/5 rounded-xl p-6 border-2 border-primary/20 shadow-sm">
+            <div className="bg-primary/5 rounded-xl p-4 sm:p-6 border-2 border-primary/20 shadow-sm">
               <div className="flex items-center gap-3 mb-5">
                 <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
                   <svg
@@ -298,74 +321,27 @@ export default function UserDetailModal({
                       key={measurement.profileId}
                       className="bg-white rounded-lg p-5 border-2 border-primary/20 hover:border-primary/40 transition-colors shadow-sm"
                     >
-                      <h4 className="font-bold text-gray-900 text-lg mb-4 pb-2 border-b border-primary/20">
+                      <h4 className="font-bold text-gray-900 text-lg mb-4 pb-2 border-b border-primary/20 break-words">
                         {measurement.profileName}
                       </h4>
-                      <div className="grid grid-cols-3 gap-3 text-sm">
-                        {measurement.bust && (
-                          <div className="bg-primary/5 rounded-lg p-3 border border-primary/20">
-                            <span className="text-primary font-semibold">
-                              Bust:
-                            </span>{" "}
-                            <span className="text-gray-900 font-bold">
-                              {measurement.bust} cm
+                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 text-sm">
+                        {MEASUREMENT_FIELDS.filter(
+                          ([key]) => measurement[key] !== null && measurement[key] !== undefined && measurement[key] !== ""
+                        ).map(([key, label]) => (
+                          <div
+                            key={key}
+                            className="bg-primary/5 rounded-lg p-3 border border-primary/20 min-w-0"
+                          >
+                            <span className="text-primary font-semibold">{label}:</span>{" "}
+                            <span className="text-gray-900 font-bold whitespace-nowrap">
+                              {measurement[key]} cm
                             </span>
                           </div>
-                        )}
-                        {measurement.waist && (
-                          <div className="bg-primary/5 rounded-lg p-3 border border-primary/20">
-                            <span className="text-primary font-semibold">
-                              Waist:
-                            </span>{" "}
-                            <span className="text-gray-900 font-bold">
-                              {measurement.waist} cm
-                            </span>
-                          </div>
-                        )}
-                        {measurement.hips && (
-                          <div className="bg-primary/5 rounded-lg p-3 border border-primary/20">
-                            <span className="text-primary font-semibold">
-                              Hips:
-                            </span>{" "}
-                            <span className="text-gray-900 font-bold">
-                              {measurement.hips} cm
-                            </span>
-                          </div>
-                        )}
-                        {measurement.shoulderWidth && (
-                          <div className="bg-primary/5 rounded-lg p-3 border border-primary/20">
-                            <span className="text-primary font-semibold">
-                              Shoulder:
-                            </span>{" "}
-                            <span className="text-gray-900 font-bold">
-                              {measurement.shoulderWidth} cm
-                            </span>
-                          </div>
-                        )}
-                        {measurement.armLength && (
-                          <div className="bg-primary/5 rounded-lg p-3 border border-primary/20">
-                            <span className="text-primary font-semibold">
-                              Arm Length:
-                            </span>{" "}
-                            <span className="text-gray-900 font-bold">
-                              {measurement.armLength} cm
-                            </span>
-                          </div>
-                        )}
-                        {measurement.legLength && (
-                          <div className="bg-primary/5 rounded-lg p-3 border border-primary/20">
-                            <span className="text-primary font-semibold">
-                              Leg Length:
-                            </span>{" "}
-                            <span className="text-gray-900 font-bold">
-                              {measurement.legLength} cm
-                            </span>
-                          </div>
-                        )}
+                        ))}
                       </div>
                       {measurement.additionalNotes && (
                         <div className="mt-4 pt-4 border-t border-primary/20">
-                          <p className="text-sm text-gray-600 italic">
+                          <p className="text-sm text-gray-600 italic whitespace-pre-line break-words">
                             {measurement.additionalNotes}
                           </p>
                         </div>
@@ -376,8 +352,49 @@ export default function UserDetailModal({
               )}
             </div>
 
+            {/* Measurement reference photos */}
+            <div className="bg-primary/5 rounded-xl p-4 sm:p-6 border-2 border-primary/20 shadow-sm">
+              <div className="flex items-center gap-3 mb-5">
+                <h3 className="text-xl font-bold text-gray-900">
+                  Measurement Reference Photos
+                </h3>
+                <span className="px-3 py-1 bg-primary/20 text-primary rounded-full text-xs font-bold border border-primary/30">
+                  {referencePhotos.length}
+                </span>
+              </div>
+              {referencePhotos.length === 0 ? (
+                <div className="bg-white rounded-lg p-6 border border-primary/20 text-center">
+                  <p className="text-sm text-gray-500">
+                    No front/side/back photos uploaded
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  {referencePhotos.map((photo) => (
+                    <a
+                      key={photo.imageId}
+                      href={photo.imageUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="group block bg-white rounded-lg border-2 border-primary/20 overflow-hidden hover:border-primary/40"
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={photo.imageUrl}
+                        alt={photo.description || "Measurement reference"}
+                        className="h-64 w-full object-contain bg-gray-50"
+                      />
+                      <p className="px-3 py-2 text-sm font-semibold text-gray-700">
+                        {photo.description || "Photo"}
+                      </p>
+                    </a>
+                  ))}
+                </div>
+              )}
+            </div>
+
             {/* Orders */}
-            <div className="bg-primary/5 rounded-xl p-6 border-2 border-primary/20 shadow-sm">
+            <div className="bg-primary/5 rounded-xl p-4 sm:p-6 border-2 border-primary/20 shadow-sm">
               <div className="flex items-center gap-3 mb-5">
                 <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
                   <svg

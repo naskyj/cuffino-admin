@@ -3,6 +3,7 @@
 import React, { useEffect, useRef } from "react";
 
 import { useClickOutside } from "@/hooks";
+import { cn } from "@/lib/utils";
 
 import { Close } from "./assets";
 
@@ -77,7 +78,12 @@ const Modal: React.FC<ModalProps> = ({
     >
       <div
         ref={modalRef}
-        className={`bg-white rounded-lg shadow-xl max-w-md w-full mx-4 max-h-[90vh] overflow-hidden ${className}`}
+        // cn (tailwind-merge) so a caller's max-w-*/padding actually replaces the default instead of
+        // both classes landing on the element and the winner depending on CSS emit order.
+        className={cn(
+          "bg-white rounded-lg shadow-xl max-w-md w-full mx-4 max-h-[90vh] overflow-hidden",
+          className
+        )}
         tabIndex={-1}
       >
         {showCloseButton && (

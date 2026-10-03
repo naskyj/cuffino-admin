@@ -24,6 +24,14 @@ import DataTable from "../_components/DataTable";
 import PageHeader from "../_components/PageHeader";
 import UserDetailModal from "./_components/UserDetailModal";
 
+type StaffType = "manager" | "vendor" | "designer";
+
+const STAFF_TYPE_LABELS: Record<StaffType, string> = {
+  manager: "Manager",
+  vendor: "Vendor",
+  designer: "Designer",
+};
+
 const UsersPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
@@ -34,9 +42,9 @@ const UsersPage = () => {
   const [userToDelete, setUserToDelete] = useState<number | null>(null);
   const [showDesignerOrdersModal, setShowDesignerOrdersModal] = useState(false);
   const [showCreateStaffModal, setShowCreateStaffModal] = useState(false);
-  const [staffType, setStaffType] = useState<"manager" | "vendor" | "designer">(
-    "manager"
-  );
+  const [staffType, setStaffType] = useState<StaffType>("manager");
+  // Display name / contact info live on the vendor and designer records; a manager has neither.
+  const hasPartnerDetails = staffType !== "manager";
   const [staffForm, setStaffForm] = useState({
     username: "",
     email: "",
@@ -210,8 +218,8 @@ const UsersPage = () => {
     }
   };
 
-  const handleOpenCreateStaff = (type: "manager" | "vendor" | "designer") => {
-    setStaffType(type);
+  const handleOpenCreateStaff = () => {
+    setStaffType("manager");
     setStaffForm({
       username: "",
       email: "",
@@ -230,8 +238,8 @@ const UsersPage = () => {
         email: staffForm.email.trim(),
         password: staffForm.password,
         phoneNumber: staffForm.phoneNumber.trim() || undefined,
-        displayName: staffForm.displayName.trim() || undefined,
-        contactInfo: staffForm.contactInfo.trim() || undefined,
+        displayName: hasPartnerDetails ? staffForm.displayName.trim() || undefined : undefined,
+        contactInfo: hasPartnerDetails ? staffForm.contactInfo.trim() || undefined : undefined,
       };
 
       if (!payload.username || !payload.email || !payload.password) {
@@ -247,12 +255,12 @@ const UsersPage = () => {
         await createDesignerUser(payload).unwrap();
       }
 
-      showToast.success(`${staffType} created successfully`);
+      showToast.success(`${STAFF_TYPE_LABELS[staffType]} created successfully`);
       setShowCreateStaffModal(false);
       refetch();
     } catch (error) {
       const err = error as { data?: { message?: string }; error?: string };
-      showToast.error(err?.data?.message || err?.error || `Failed to create ${staffType}`);
+      showToast.error(err?.data?.message || err?.error || `Failed to create ${STAFF_TYPE_LABELS[staffType].toLowerCase()}`);
     }
   };
 
@@ -420,17 +428,9 @@ const UsersPage = () => {
         actions={
           <div className="flex gap-3">
             {canManageUsers ? (
-              <>
-                <Button variant="outline" size="sm" onClick={() => handleOpenCreateStaff("manager")}>
-                  Add Manager
-                </Button>
-                <Button variant="outline" size="sm" onClick={() => handleOpenCreateStaff("vendor")}>
-                  Add Vendor
-                </Button>
-                <Button variant="outline" size="sm" onClick={() => handleOpenCreateStaff("designer")}>
-                  Add Designer
-                </Button>
-              </>
+              <Button variant="outline" size="sm" onClick={handleOpenCreateStaff}>
+                Add User
+              </Button>
             ) : null}
             <Button
               variant="outline"
@@ -637,7 +637,26 @@ const UsersPage = () => {
         className="max-w-lg"
       >
         <div className="p-6 space-y-4">
-          <h2 className="text-xl font-bold text-gray-900">Create {staffType}</h2>
+          <h2 className="text-xl font-bold text-gray-900">Add User</h2>
+          <div>
+            <label htmlFor="staff-type" className="block text-sm font-medium text-gray-700 mb-1">
+              Role
+            </label>
+            {/* No ADMIN option on purpose - admin accounts aren't self-service. Customers sign
+                up themselves on the storefront. */}
+            <select
+              id="staff-type"
+              value={staffType}
+              onChange={(e) => setStaffType(e.target.value as StaffType)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white"
+            >
+              {(Object.keys(STAFF_TYPE_LABELS) as StaffType[]).map((type) => (
+                <option key={type} value={type}>
+                  {STAFF_TYPE_LABELS[type]}
+                </option>
+              ))}
+            </select>
+          </div>
           <input
             type="text"
             placeholder="Username"
@@ -666,20 +685,24 @@ const UsersPage = () => {
             onChange={(e) => setStaffForm((prev) => ({ ...prev, phoneNumber: e.target.value }))}
             className="w-full px-3 py-2 border border-gray-300 rounded-md"
           />
-          <input
-            type="text"
-            placeholder="Display name (optional)"
-            value={staffForm.displayName}
-            onChange={(e) => setStaffForm((prev) => ({ ...prev, displayName: e.target.value }))}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md"
-          />
-          <input
-            type="text"
-            placeholder="Contact info (optional)"
-            value={staffForm.contactInfo}
-            onChange={(e) => setStaffForm((prev) => ({ ...prev, contactInfo: e.target.value }))}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md"
-          />
+          {hasPartnerDetails && (
+            <>
+              <input
+                type="text"
+                placeholder="Display name (optional)"
+                value={staffForm.displayName}
+                onChange={(e) => setStaffForm((prev) => ({ ...prev, displayName: e.target.value }))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+              />
+              <input
+                type="text"
+                placeholder="Contact info (optional)"
+                value={staffForm.contactInfo}
+                onChange={(e) => setStaffForm((prev) => ({ ...prev, contactInfo: e.target.value }))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+              />
+            </>
+          )}
 
           <div className="flex justify-end gap-2 pt-2">
             <Button variant="outline" onClick={() => setShowCreateStaffModal(false)}>
