@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import React, { useState } from "react";
 
 import ConfirmDialog from "@/components/ConfirmDialog";
@@ -9,6 +10,7 @@ import {
   useCreateInventoryMutation,
   useDeleteInventoryMutation,
   useGetAllInventoriesQuery,
+  useGetPricingFabricsQuery,
   useUpdateInventoryMutation,
 } from "@/store/api";
 import { isAdminRole } from "@/utilities";
@@ -31,6 +33,9 @@ const InventoryPage = () => {
     isLoading,
     refetch,
   } = useGetAllInventoriesQuery();
+  // Fabrics made in Pricing are edited there; this page shows them read-only.
+  const { data: pricingFabrics = [] } = useGetPricingFabricsQuery();
+  const managedIds = new Set(pricingFabrics.map((f) => f.inventoryId));
   const [createInventory] = useCreateInventoryMutation();
   const [updateInventory] = useUpdateInventoryMutation();
   const [deleteInventory] = useDeleteInventoryMutation();
@@ -212,8 +217,16 @@ const InventoryPage = () => {
     {
       key: "actions",
       header: "Actions",
-      render: (_value: unknown, row: Inventory) => (
-        <div className="flex gap-2">
+      render: (_value: unknown, row: Inventory) =>
+        managedIds.has(row.inventoryId) ? (
+          <Link
+            href="/pricing"
+            className="text-amber-700 hover:text-amber-900 text-sm underline"
+          >
+            Managed in Pricing
+          </Link>
+        ) : (
+          <div className="flex gap-2">
           <button
             type="button"
             onClick={() => openEditModal(row)}
@@ -231,7 +244,7 @@ const InventoryPage = () => {
             </button>
           )}
         </div>
-      ),
+        ),
     },
   ];
 
@@ -287,6 +300,13 @@ const InventoryPage = () => {
           </div>
         }
       />
+
+      <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm text-blue-900">
+        Fabrics added or imported under Pricing are read-only here (they show quantity 0 because they are made to order). Change their prices, price unit and availability in the Fabrics tab of Pricing.{" "}
+        <Link href="/pricing" className="font-semibold underline">
+          Open Pricing
+        </Link>
+      </div>
 
       {/* Quick Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">

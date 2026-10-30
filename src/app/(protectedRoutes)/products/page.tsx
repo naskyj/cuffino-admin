@@ -2,6 +2,7 @@
 
 "use client";
 
+import Link from "next/link";
 import React, { useState } from "react";
 
 import ConfirmDialog from "@/components/ConfirmDialog";
@@ -14,6 +15,7 @@ import {
   useGetAllCategoriesQuery,
   useGetAllInventoriesQuery,
   useGetAllProductsQuery,
+  useGetPricingStylesQuery,
   useUpdateProductMutation,
   useUploadImageMutation,
 } from "@/store/api";
@@ -38,6 +40,9 @@ const ProductsPage = () => {
   const { data: products = [], isLoading, refetch } = useGetAllProductsQuery();
   const { data: categories = [] } = useGetAllCategoriesQuery();
   const { data: inventories = [] } = useGetAllInventoriesQuery();
+  // Styles made in Pricing are edited there; this page shows them read-only.
+  const { data: pricingStyles = [] } = useGetPricingStylesQuery();
+  const managedIds = new Set(pricingStyles.map((s) => s.productId));
   const [deleteProduct] = useDeleteProductMutation();
   const [createProduct] = useCreateProductMutation();
   const [updateProduct] = useUpdateProductMutation();
@@ -372,8 +377,16 @@ const ProductsPage = () => {
     {
       key: "actions",
       header: "Actions",
-      render: (_value: any, row: any) => (
-        <div className="flex gap-2">
+      render: (_value: any, row: any) =>
+        managedIds.has(row.productId) ? (
+          <Link
+            href="/pricing"
+            className="text-amber-700 hover:text-amber-900 text-sm underline"
+          >
+            Managed in Pricing
+          </Link>
+        ) : (
+          <div className="flex gap-2">
           <button
             type="button"
             onClick={() => openEditModal(row)}
@@ -391,7 +404,7 @@ const ProductsPage = () => {
             </button>
           )}
         </div>
-      ),
+        ),
     },
   ];
 
@@ -457,6 +470,13 @@ const ProductsPage = () => {
           </div>
         }
       />
+
+      <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm text-blue-900">
+        Styles added or imported under Pricing are read-only here. Change their prices, yards, fabrics and visibility in the Styles tab of Pricing. Use this page for other products.{" "}
+        <Link href="/pricing" className="font-semibold underline">
+          Open Pricing
+        </Link>
+      </div>
 
       {/* Quick Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
