@@ -59,6 +59,10 @@ const InventoryPage = () => {
   };
 
   const validateInventoryForm = () => {
+    if (!formData.materialName.trim()) {
+      showToast.error("Material name is required");
+      return false;
+    }
     if (Number(formData.quantity) < 0) {
       showToast.error("Quantity cannot be negative");
       return false;
@@ -90,8 +94,8 @@ const InventoryPage = () => {
       setShowAddModal(false);
       resetForm();
       refetch();
-    } catch {
-      showToast.error("Failed to create inventory item");
+    } catch (error: any) {
+      showToast.error(error?.data?.message || "Failed to create inventory item");
     }
   };
 
@@ -116,8 +120,8 @@ const InventoryPage = () => {
       setSelectedItem(null);
       resetForm();
       refetch();
-    } catch {
-      showToast.error("Failed to update inventory item");
+    } catch (error: any) {
+      showToast.error(error?.data?.message || "Failed to update inventory item");
     }
   };
 
@@ -134,8 +138,8 @@ const InventoryPage = () => {
         refetch();
         setShowDeleteDialog(false);
         setItemToDelete(null);
-      } catch {
-        showToast.error("Failed to delete inventory item");
+      } catch (error: any) {
+        showToast.error(error?.data?.message || "Failed to delete inventory item");
         setShowDeleteDialog(false);
         setItemToDelete(null);
       }

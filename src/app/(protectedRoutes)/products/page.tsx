@@ -17,7 +17,7 @@ import {
   useGetAllProductsQuery,
   useGetPricingStylesQuery,
   useUpdateProductMutation,
-  useUploadImageMutation,
+  useUploadProductImageMutation,
 } from "@/store/api";
 import { isAdminRole } from "@/utilities";
 import { showToast } from "@/utilities/toast";
@@ -47,7 +47,7 @@ const ProductsPage = () => {
   const [createProduct] = useCreateProductMutation();
   const [updateProduct] = useUpdateProductMutation();
   const [createCategory] = useCreateCategoryMutation();
-  const [uploadImage] = useUploadImageMutation();
+  const [uploadImage] = useUploadProductImageMutation();
 
   const [formData, setFormData] = useState({
     name: "",
@@ -118,12 +118,16 @@ const ProductsPage = () => {
 
   const handleAdd = async () => {
     try {
-      if (formData.defaultFabricInventoryIds.length === 0) {
-        showToast.error("Please select at least one default fabric");
+      if (!formData.name.trim()) {
+        showToast.error("Product name is required");
         return;
       }
-      if (Number(formData.price) < 0) {
-        showToast.error("Price cannot be negative");
+      if (!(Number(formData.price) > 0)) {
+        showToast.error("Price must be greater than 0");
+        return;
+      }
+      if (formData.defaultFabricInventoryIds.length === 0) {
+        showToast.error("Please select at least one default fabric");
         return;
       }
       if (formData.stockQuantity && Number(formData.stockQuantity) < 0) {
@@ -165,12 +169,16 @@ const ProductsPage = () => {
   const handleEdit = async () => {
     if (!selectedProduct) return;
     try {
-      if (formData.defaultFabricInventoryIds.length === 0) {
-        showToast.error("Please select at least one default fabric");
+      if (!formData.name.trim()) {
+        showToast.error("Product name is required");
         return;
       }
-      if (Number(formData.price) < 0) {
-        showToast.error("Price cannot be negative");
+      if (!(Number(formData.price) > 0)) {
+        showToast.error("Price must be greater than 0");
+        return;
+      }
+      if (formData.defaultFabricInventoryIds.length === 0) {
+        showToast.error("Please select at least one default fabric");
         return;
       }
       if (formData.stockQuantity && Number(formData.stockQuantity) < 0) {
@@ -214,6 +222,10 @@ const ProductsPage = () => {
   };
 
   const handleCreateCategory = async () => {
+    if (!categoryFormData.categoryName.trim()) {
+      showToast.error("Category name is required");
+      return;
+    }
     try {
       await createCategory({
         categoryName: categoryFormData.categoryName,
@@ -230,7 +242,7 @@ const ProductsPage = () => {
 
   const handleImageUpload = async (file: File) => {
     try {
-      const response = await uploadImage({ file }).unwrap();
+      const response = await uploadImage(file).unwrap();
       setUploadedImages([...uploadedImages, response.imageUrl]);
       showToast.success("Image uploaded successfully");
     } catch (error: any) {

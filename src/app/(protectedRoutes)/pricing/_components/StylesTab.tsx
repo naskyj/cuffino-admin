@@ -13,6 +13,7 @@ import {
   useGetPricingStylesQuery,
   useSetPricingStyleActiveMutation,
   useUpsertPricingStyleMutation,
+  useUploadProductImageMutation,
 } from "@/store/api";
 import { showToast } from "@/utilities/toast";
 
@@ -169,6 +170,29 @@ const StylesTab = () => {
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState<FormState>(emptyForm);
   const [formError, setFormError] = useState("");
+  const [uploadProductImage] = useUploadProductImageMutation();
+  const [uploading, setUploading] = useState(false);
+
+  // Picks one or more pictures, stores them in S3 and appends their permanent URLs to the field
+  const uploadImages = async (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    setUploading(true);
+    const urls: string[] = [];
+    try {
+      for (const file of Array.from(files)) {
+        // eslint-disable-next-line no-await-in-loop
+        const res = await uploadProductImage(file).unwrap();
+        urls.push(res.imageUrl);
+      }
+      const existing = form.imageUrl ? [form.imageUrl] : [];
+      setForm((f) => ({ ...f, imageUrl: [...existing, ...urls].join(",") }));
+      showToast.success(`${urls.length} picture(s) uploaded`);
+    } catch (e) {
+      showToast.error(apiErrorMessage(e, "Picture upload failed"));
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const set = <K extends keyof FormState>(key: K, value: FormState[K]) =>
     setForm((current) => ({ ...current, [key]: value }));
@@ -498,12 +522,26 @@ const StylesTab = () => {
                 onChange={(e) => set("supplier", e.target.value)}
               />
             </Field>
-            <Field label="Image URL">
+            <Field label="Images (first one is the main picture; separate links with commas)">
               <input
                 className={inputClass}
                 value={form.imageUrl}
                 onChange={(e) => set("imageUrl", e.target.value)}
               />
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                disabled={uploading}
+                className="mt-2 text-xs"
+                onChange={(e) => {
+                  uploadImages(e.target.files);
+                  e.target.value = "";
+                }}
+              />
+              {uploading && (
+                <p className="text-xs text-gray-500 mt-1">Uploading...</p>
+              )}
             </Field>
           </div>
 

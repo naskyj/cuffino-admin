@@ -39,6 +39,16 @@ export const imageApi = baseSlice.injectEndpoints({
       invalidatesTags: ["Images", "Upload"],
     }),
 
+    // Catalogue pictures for styles/products: stored under products/ with a permanent URL
+    // (uploadImage above is for customers' private photos and returns a link that expires).
+    uploadProductImage: builder.mutation<{ imageUrl: string }, File>({
+      query: (file) => {
+        const formData = new FormData();
+        formData.append("file", file);
+        return { url: "/product/images/upload", method: "POST", body: formData };
+      },
+    }),
+
     // A customer's own uploads, viewed by staff - e.g. the MEASUREMENT_REFERENCE front/side/back
     // photos a reviewer checks against the measurements the customer typed in.
     getUserImages: builder.query<ImageUploadResponse[], { userId: number; imageType?: string }>({
@@ -71,6 +81,7 @@ export const imageApi = baseSlice.injectEndpoints({
 });
 
 export const {
+  useUploadProductImageMutation,
   useGetUserImagesQuery,
   useUploadImageMutation,
   useDeleteImageMutation,
