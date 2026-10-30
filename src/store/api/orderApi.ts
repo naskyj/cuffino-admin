@@ -78,6 +78,8 @@ export interface OrderResponseDTO {
   orderDate: string;
   shippingAddress?: any;
   items?: OrderItemResponseDTO[];
+  productionHold?: boolean;
+  productionHoldReason?: string | null;
 }
 
 export interface OrderSearchCriteria {

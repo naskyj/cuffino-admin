@@ -1,6 +1,19 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import {
+  Boxes,
+  Calculator,
+  CreditCard,
+  Headset,
+  LayoutDashboard,
+  RotateCcw,
+  Scissors,
+  Shirt,
+  ShoppingBag,
+  Truck,
+  Users,
+} from "lucide-react";
 import { useDispatch } from "react-redux";
 
 import { Modal } from "@/components/ui";
@@ -14,14 +27,6 @@ import {
   onLogoutBroadcast,
 } from "@/utilities";
 
-import {
-  DashboardIcon,
-  LogisticsIcon,
-  OrdersIcon,
-  PaymentsIcon,
-  ProductsIcon,
-  User,
-} from "./assets";
 import DasboardHeader from "./DasboardHeader";
 import MobileSideBar from "./MobileSideBar";
 import SideBar from "./SideBar";
@@ -76,66 +81,91 @@ const View = ({ children }: { children: React.ReactNode }) => {
     };
   }, []);
 
+  // Pricing API is ADMIN/MANAGER only; hide the entry for every other role.
+  const userRole = (userProfile?.role || "").toUpperCase();
+  const canSeePricing = userRole === "ADMIN" || userRole === "MANAGER";
+
   const sidebarItems = [
     {
       id: "dashboard",
       title: "Dashboard",
       route: "/dashboard",
-      icon: <DashboardIcon className="w-5 h-5" />,
+      icon: <LayoutDashboard className="w-4 h-4" />,
+      iconClassName: "bg-indigo-50 text-indigo-600",
     },
     {
       id: "orders",
       title: "Orders",
       route: "/orders",
-      icon: <OrdersIcon className="w-5 h-5" />,
+      icon: <ShoppingBag className="w-4 h-4" />,
+      iconClassName: "bg-blue-50 text-blue-600",
     },
     {
       id: "products",
       title: "Products",
       route: "/products",
-      icon: <ProductsIcon className="w-5 h-5" />,
+      icon: <Shirt className="w-4 h-4" />,
+      iconClassName: "bg-pink-50 text-pink-600",
     },
+    ...(canSeePricing
+      ? [
+          {
+            id: "pricing",
+            title: "Pricing",
+            route: "/pricing",
+            icon: <Calculator className="w-4 h-4" />,
+            iconClassName: "bg-lime-50 text-lime-600",
+          },
+        ]
+      : []),
     {
       id: "production",
       title: "Production",
       route: "/production",
-      icon: <ProductsIcon className="w-5 h-5" />,
+      icon: <Scissors className="w-4 h-4" />,
+      iconClassName: "bg-violet-50 text-violet-600",
     },
     {
       id: "inventory",
       title: "Inventory",
       route: "/inventory",
-      icon: <ProductsIcon className="w-5 h-5" />,
+      icon: <Boxes className="w-4 h-4" />,
+      iconClassName: "bg-amber-50 text-amber-600",
     },
     {
       id: "logistics",
       title: "Logistics",
       route: "/logistics",
-      icon: <LogisticsIcon className="w-5 h-5" />,
+      icon: <Truck className="w-4 h-4" />,
+      iconClassName: "bg-cyan-50 text-cyan-600",
     },
     {
       id: "returns",
       title: "Returns",
       route: "/returns",
-      icon: <OrdersIcon className="w-5 h-5" />,
+      icon: <RotateCcw className="w-4 h-4" />,
+      iconClassName: "bg-orange-50 text-orange-600",
     },
     {
       id: "payments",
       title: "Payments",
       route: "/payments",
-      icon: <PaymentsIcon className="w-5 h-5" />,
+      icon: <CreditCard className="w-4 h-4" />,
+      iconClassName: "bg-emerald-50 text-emerald-600",
     },
     {
       id: "support",
       title: "Support",
       route: "/support",
-      icon: <OrdersIcon className="w-5 h-5" />,
+      icon: <Headset className="w-4 h-4" />,
+      iconClassName: "bg-rose-50 text-rose-600",
     },
     {
       id: "users",
       title: "Users",
       route: "/users",
-      icon: <User className="w-5 h-5" />,
+      icon: <Users className="w-4 h-4" />,
+      iconClassName: "bg-sky-50 text-sky-600",
     },
   ];
 

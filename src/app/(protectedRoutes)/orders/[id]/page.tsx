@@ -12,6 +12,8 @@ import {
 } from "@/store/api";
 import { showToast } from "@/utilities/toast";
 
+import ItemPriceBreakdown from "./_components/ItemPriceBreakdown";
+
 const toLabel = (key: string) =>
   key
     .replace(/([A-Z])/g, " $1")
@@ -219,6 +221,16 @@ export default function OrderDetailsPage() {
         </span>
       </div>
 
+      {order.productionHoldReason?.startsWith("Price review") && (
+        <div className="rounded-lg border-2 border-amber-400 bg-amber-50 p-4">
+          <p className="text-sm font-semibold text-amber-900">Production on hold</p>
+          <p className="text-sm text-amber-800">
+            {order.productionHoldReason}. Review each flagged item&apos;s price breakdown below and
+            clear the review to release the hold.
+          </p>
+        </div>
+      )}
+
       <div className="bg-white rounded-lg border border-gray-200 p-6">
         <h2 className="text-lg font-semibold text-gray-900 mb-4">Order Summary</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
@@ -306,6 +318,8 @@ export default function OrderDetailsPage() {
                 Item total: {formatCurrency((item.unitPrice || 0) * item.quantity)}
               </div>
             </div>
+
+            <ItemPriceBreakdown orderItemId={item.orderItemId} />
 
             {item.customizations && item.customizations.length > 0 && (
               <div className="space-y-2">

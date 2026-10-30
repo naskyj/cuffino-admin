@@ -5,6 +5,8 @@ export interface SideBarItem {
   title: string;
   route: string;
   icon: ReactNode;
+  /** Tailwind classes for the coloured chip behind the icon, e.g. "bg-blue-50 text-blue-600". */
+  iconClassName?: string;
   isActive?: boolean;
   onClick?: () => void;
 }

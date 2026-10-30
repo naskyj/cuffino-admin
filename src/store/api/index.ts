@@ -8,6 +8,7 @@ export * from "./logisticsApi";
 export * from "./notificationApi";
 export * from "./orderApi";
 export * from "./paymentApi";
+export * from "./pricingApi";
 export * from "./productApi";
 export * from "./productionApi";
 export * from "./returnApi";

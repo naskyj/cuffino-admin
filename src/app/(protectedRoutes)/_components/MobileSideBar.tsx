@@ -157,8 +157,8 @@ const MobileSideBar: React.FC<MobileSideBarProps> = ({
                 >
                   <div
                     className={cn(
-                      "w-5 h-5 flex items-center justify-center transition-colors",
-                      isActive ? "text-primary" : "text-gray-500"
+                      "w-7 h-7 rounded-md flex items-center justify-center transition-colors",
+                      item.iconClassName ?? (isActive ? "text-primary" : "text-gray-500")
                     )}
                   >
                     {item.icon}
