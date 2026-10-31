@@ -10,7 +10,6 @@ import { Button, Modal } from "@/components/ui";
 import {
   ProductCustomizationDTO,
   useCreateCategoryMutation,
-  useCreateProductMutation,
   useDeleteProductMutation,
   useGetAllCategoriesQuery,
   useGetAllInventoriesQuery,
@@ -29,7 +28,6 @@ const ProductsPage = () => {
   const canDelete = isAdminRole();
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
-  const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -47,7 +45,6 @@ const ProductsPage = () => {
     pricingStyles.map((s) => [s.productId, s.styleCode])
   );
   const [deleteProduct] = useDeleteProductMutation();
-  const [createProduct] = useCreateProductMutation();
   const [updateProduct] = useUpdateProductMutation();
   const [createCategory] = useCreateCategoryMutation();
   const [uploadImage] = useUploadProductImageMutation();
@@ -117,56 +114,6 @@ const ProductsPage = () => {
       customizationType: "",
       customizationValue: "",
     });
-  };
-
-  const handleAdd = async () => {
-    try {
-      if (!formData.name.trim()) {
-        showToast.error("Product name is required");
-        return;
-      }
-      if (!(Number(formData.price) > 0)) {
-        showToast.error("Price must be greater than 0");
-        return;
-      }
-      if (formData.defaultFabricInventoryIds.length === 0) {
-        showToast.error("Please select at least one default fabric");
-        return;
-      }
-      if (formData.stockQuantity && Number(formData.stockQuantity) < 0) {
-        showToast.error("Stock quantity cannot be negative");
-        return;
-      }
-
-      const productData: any = {
-        name: formData.name,
-        description: formData.description || undefined,
-        price: Number(formData.price),
-        stockQuantity: formData.stockQuantity
-          ? Number(formData.stockQuantity)
-          : 0,
-        images: uploadedImages.map((url) => ({ imageUrl: url })),
-        customizations:
-          formData.customizations.length > 0
-            ? formData.customizations
-            : undefined,
-        defaultFabricInventoryIds: formData.defaultFabricInventoryIds,
-      };
-
-      if (formData.categoryId) {
-        productData.category = {
-          categoryId: Number(formData.categoryId),
-        };
-      }
-
-      await createProduct(productData).unwrap();
-      showToast.success("Product created successfully");
-      setShowAddModal(false);
-      resetForm();
-      refetch();
-    } catch (error: any) {
-      showToast.error(error?.data?.message || "Failed to create product");
-    }
   };
 
   const handleEdit = async () => {
@@ -489,7 +436,7 @@ const ProductsPage = () => {
       />
 
       <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm text-blue-900">
-        Styles added or imported under Pricing are read-only here. New products are added as styles in Pricing. Use Edit style to change a style's prices, yards, fabrics, pictures and visibility.{" "}
+        Styles added or imported under Pricing are read-only here. New products are added as styles in Pricing. Use Edit style to change the prices, yards, fabrics, pictures and visibility.{" "}
         <Link href="/pricing" className="font-semibold underline">
           Open Pricing
         </Link>
@@ -554,271 +501,6 @@ const ProductsPage = () => {
           />
         </div>
       )}
-
-      {/* Add Product Modal */}
-      <Modal
-        isOpen={showAddModal}
-        onClose={() => {
-          setShowAddModal(false);
-          resetForm();
-        }}
-        showCloseButton
-        className="max-w-2xl"
-      >
-        <div className="p-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Add Product</h2>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Product Name *
-              </label>
-              <input
-                type="text"
-                value={formData.name}
-                onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Description
-              </label>
-              <textarea
-                value={formData.description}
-                onChange={(e) =>
-                  setFormData({ ...formData, description: e.target.value })
-                }
-                rows={3}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-              />
-            </div>
-            <div className="grid grid-cols-3 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Price *
-                </label>
-                <input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={formData.price}
-                  onChange={(e) =>
-                    setFormData({ ...formData, price: e.target.value })
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Stock Quantity *
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  value={formData.stockQuantity}
-                  onChange={(e) =>
-                    setFormData({ ...formData, stockQuantity: e.target.value })
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Category
-                </label>
-                <select
-                  value={formData.categoryId}
-                  onChange={(e) =>
-                    setFormData({ ...formData, categoryId: e.target.value })
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-                >
-                  <option value="">Select Category</option>
-                  {categories.map((cat: any) => (
-                    <option key={cat.categoryId} value={cat.categoryId}>
-                      {cat.categoryName}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Product Images
-              </label>
-              <input
-                type="file"
-                accept="image/*"
-                multiple
-                onChange={(e) => {
-                  if (e.target.files) {
-                    Array.from(e.target.files).forEach((file) => {
-                      handleImageUpload(file);
-                    });
-                  }
-                }}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-              />
-              {uploadedImages.length > 0 && (
-                <div className="mt-2 flex gap-2 flex-wrap">
-                  {uploadedImages.map((url, index) => (
-                    <img
-                      key={url}
-                      src={url}
-                      alt={`Upload ${index + 1}`}
-                      className="w-20 h-20 object-cover rounded"
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Default Fabrics (Inventory)
-              </label>
-              <div className="max-h-40 overflow-y-auto border border-gray-300 rounded-md p-3 space-y-2">
-                {inventories.length === 0 ? (
-                  <p className="text-sm text-gray-500">No inventory fabrics available</p>
-                ) : (
-                  inventories.map((inventory: any) => {
-                    const checked = formData.defaultFabricInventoryIds.includes(
-                      inventory.inventoryId
-                    );
-                    return (
-                      <label
-                        key={`add-fabric-${inventory.inventoryId}`}
-                        className="flex items-center gap-2 text-sm"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={checked}
-                          onChange={(e) => {
-                            const next = e.target.checked
-                              ? [...formData.defaultFabricInventoryIds, inventory.inventoryId]
-                              : formData.defaultFabricInventoryIds.filter(
-                                  (id) => id !== inventory.inventoryId
-                                );
-                            setFormData({ ...formData, defaultFabricInventoryIds: next });
-                          }}
-                        />
-                        <span>
-                          {inventory.materialName} ({inventory.quantity}
-                          {inventory.unit ? ` ${inventory.unit}` : ""})
-                        </span>
-                      </label>
-                    );
-                  })
-                )}
-              </div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Customizations
-              </label>
-              <div className="border border-gray-300 rounded-md p-4 space-y-3">
-                <div className="grid grid-cols-4 gap-2">
-                  <input
-                    type="text"
-                    placeholder="Name (e.g., Color)"
-                    value={customizationForm.name}
-                    onChange={(e) =>
-                      setCustomizationForm({
-                        ...customizationForm,
-                        name: e.target.value,
-                      })
-                    }
-                    className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary text-sm"
-                  />
-                  <input
-                    type="text"
-                    placeholder="Type (e.g., SELECT)"
-                    value={customizationForm.customizationType}
-                    onChange={(e) =>
-                      setCustomizationForm({
-                        ...customizationForm,
-                        customizationType: e.target.value,
-                      })
-                    }
-                    className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary text-sm"
-                  />
-                  <input
-                    type="text"
-                    placeholder="Value (e.g., Red, Blue)"
-                    value={customizationForm.customizationValue}
-                    onChange={(e) =>
-                      setCustomizationForm({
-                        ...customizationForm,
-                        customizationValue: e.target.value,
-                      })
-                    }
-                    className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary text-sm"
-                  />
-                  <Button
-                    type="button"
-                    size="sm"
-                    onClick={handleAddCustomization}
-                    className="text-sm"
-                  >
-                    Add
-                  </Button>
-                </div>
-                <input
-                  type="text"
-                  placeholder="Description (optional)"
-                  value={customizationForm.description}
-                  onChange={(e) =>
-                    setCustomizationForm({
-                      ...customizationForm,
-                      description: e.target.value,
-                    })
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary text-sm"
-                />
-                {formData.customizations.length > 0 && (
-                  <div className="mt-3 space-y-2">
-                    {formData.customizations.map((cust, index) => (
-                      <div
-                        key={`${cust.name}-${cust.customizationType}-${cust.customizationValue}`}
-                        className="flex items-center justify-between bg-gray-50 p-2 rounded"
-                      >
-                        <div className="text-sm">
-                          <span className="font-medium">{cust.name}</span> (
-                          {cust.customizationType}): {cust.customizationValue}
-                          {cust.description && ` - ${cust.description}`}
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveCustomization(index)}
-                          className="text-red-600 hover:text-red-800 text-sm"
-                        >
-                          Remove
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-            <div className="flex gap-3 justify-end">
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setShowAddModal(false);
-                  resetForm();
-                }}
-              >
-                Cancel
-              </Button>
-              <Button onClick={handleAdd}>Add Product</Button>
-            </div>
-          </div>
-        </div>
-      </Modal>
 
       {/* Edit Product Modal */}
       <Modal
