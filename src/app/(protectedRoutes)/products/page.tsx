@@ -43,6 +43,9 @@ const ProductsPage = () => {
   // Styles made in Pricing are edited there; this page shows them read-only.
   const { data: pricingStyles = [] } = useGetPricingStylesQuery();
   const managedIds = new Set(pricingStyles.map((s) => s.productId));
+  const styleCodeByProduct = new Map(
+    pricingStyles.map((s) => [s.productId, s.styleCode])
+  );
   const [deleteProduct] = useDeleteProductMutation();
   const [createProduct] = useCreateProductMutation();
   const [updateProduct] = useUpdateProductMutation();
@@ -392,10 +395,12 @@ const ProductsPage = () => {
       render: (_value: any, row: any) =>
         managedIds.has(row.productId) ? (
           <Link
-            href="/pricing"
+            href={`/pricing?tab=styles&edit=${encodeURIComponent(
+              styleCodeByProduct.get(row.productId) || ""
+            )}`}
             className="text-amber-700 hover:text-amber-900 text-sm underline"
           >
-            Managed in Pricing
+            Edit style
           </Link>
         ) : (
           <div className="flex gap-2">
@@ -476,15 +481,15 @@ const ProductsPage = () => {
             >
               Add Category
             </Button>
-            <Button size="sm" onClick={() => setShowAddModal(true)}>
-              Add Product
-            </Button>
+            <Link href="/pricing?tab=styles&new=1">
+              <Button size="sm">Add Style</Button>
+            </Link>
           </div>
         }
       />
 
       <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm text-blue-900">
-        Styles added or imported under Pricing are read-only here. Change their prices, yards, fabrics and visibility in the Styles tab of Pricing. Use this page for other products.{" "}
+        Styles added or imported under Pricing are read-only here. New products are added as styles in Pricing. Use Edit style to change a style's prices, yards, fabrics, pictures and visibility.{" "}
         <Link href="/pricing" className="font-semibold underline">
           Open Pricing
         </Link>

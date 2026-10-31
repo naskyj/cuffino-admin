@@ -35,8 +35,19 @@ const PricingPage = () => {
   // Read after mount: the role lives in a cookie, so SSR cannot know it.
   const [isAdmin, setIsAdmin] = useState(false);
 
+  // Deep links from other pages: /pricing?tab=styles&new=1 or &edit=<styleCode>
+  const [styleAction, setStyleAction] = useState<{
+    create?: boolean;
+    edit?: string;
+  }>({});
+
   useEffect(() => {
     setIsAdmin(isAdminRole());
+    const params = new URLSearchParams(window.location.search);
+    const tab = params.get("tab") as TabId | null;
+    if (tab && tabs.some((t) => t.id === tab)) setActiveTab(tab);
+    if (params.get("new")) setStyleAction({ create: true });
+    else if (params.get("edit")) setStyleAction({ edit: params.get("edit")! });
   }, []);
 
   const visibleTabs = tabs.filter((tab) => !tab.adminOnly || isAdmin);
@@ -67,7 +78,7 @@ const PricingPage = () => {
       </div>
 
       {activeTab === "overview" && <OverviewTab isAdmin={isAdmin} />}
-      {activeTab === "styles" && <StylesTab />}
+      {activeTab === "styles" && <StylesTab initialAction={styleAction} />}
       {activeTab === "fabrics" && <FabricsTab />}
       {activeTab === "settings" && isAdmin && <SettingsTab />}
       {activeTab === "rules" && isAdmin && <RulesTab />}

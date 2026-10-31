@@ -2,7 +2,7 @@
 
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import { Button, Modal } from "@/components/ui";
 import {
@@ -159,7 +159,11 @@ const BandEditor = ({
   </div>
 );
 
-const StylesTab = () => {
+const StylesTab = ({
+  initialAction,
+}: {
+  initialAction?: { create?: boolean; edit?: string };
+}) => {
   const { data: styles = [], isLoading } = useGetPricingStylesQuery();
   const { data: fabrics = [] } = useGetPricingFabricsQuery();
   const [upsertStyle, { isLoading: isSaving }] =
@@ -203,6 +207,21 @@ const StylesTab = () => {
     setFormError("");
     setShowForm(true);
   };
+
+  // Arrived from another page (e.g. Products > Add Product / Edit): open the right form once
+  const handledInitial = useRef(false);
+  useEffect(() => {
+    if (handledInitial.current || !initialAction) return;
+    if (initialAction.create) {
+      handledInitial.current = true;
+      openForm();
+    } else if (initialAction.edit && styles.length > 0) {
+      handledInitial.current = true;
+      const target = styles.find((s) => s.styleCode === initialAction.edit);
+      if (target) openForm(target);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialAction, styles]);
 
   const toggleActive = async (style: PricingStyle) => {
     try {
